@@ -90,8 +90,7 @@ def dewrangle_study(dewrangle_org, study_file):
     fp = study_file()
 
     runner = CliRunner()
-    result = runner.invoke(
-        upsert_study, [fp, org["id"]], standalone_mode=False)
+    result = runner.invoke(upsert_study, [fp, org["id"]], standalone_mode=False)
     return result.return_value, fp
 
 
@@ -184,5 +183,3 @@ def make_dewrangle_volume(dewrangle_credential):
         return volume
 
     return _make_volume
-
-

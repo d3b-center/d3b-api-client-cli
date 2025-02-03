@@ -68,5 +68,5 @@ config = {
             "aws_secret_access_key": os.environ.get("AWS_SECRET_ACCESS_KEY"),
             "test_bucket_name": os.environ.get("AWS_BUCKET_DATA_TRANSFER_TEST"),
         },
-    }
+    },
 }
