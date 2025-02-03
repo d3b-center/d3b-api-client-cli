@@ -1,0 +1,46 @@
+[project]
+name = "d3b_api_client_cli"
+version = "0.0.1"
+authors = [
+  { name="Charles Haynes", email="haynescd@chop.edu" },
+  { name="Natasha Singh", email="singhn4@chop.edu" },
+]
+description = "A CLI tool with functions that interact with commonly used D3b APIs"
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache License",
+    "Operating System :: Linux",
+]
+dependencies = [
+  "click==8.1.7",
+  "python-dotenv==1.0.1",
+  "gql==3.5.0",
+  "gql[aiohttp]==3.5.0",
+  "requests==2.32.3",
+  "pandas==2.2.3",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest==8.3.3",
+  "pytest-mock==3.14.0",
+  "black==24.10.0",
+  "testcontainers[postgres]==4.9.0",
+  "requests-mock==1.12.1",
+]
+
+[project.scripts]
+d3b-clients = "d3b_api_client_cli.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/d3b-center/d3b-api-client-cli"
+Issues = "https://github.com/d3b-center/d3b-api-client-cli/issues"
+
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+exclude = ["data"]
