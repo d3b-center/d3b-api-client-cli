@@ -18,7 +18,7 @@ AWS_SECRET_ACCESS_KEY = config["aws"]["s3"]["aws_secret_access_key"]
 
 def test_upsert_credential_bad_input():
     """
-    Test `d3b dewrangle upsert-credential` command
+    Test `d3b-clients dewrangle upsert-credential` command
     """
     runner = CliRunner()
 
@@ -41,9 +41,9 @@ def test_upsert_credential_bad_input():
 
 def test_crud_credential(tmp_path, dewrangle_study):
     """
-    Test `d3b dewrangle upsert-credential` command
-    Test `d3b dewrangle delete-credential` command
-    Test `d3b dewrangle read-credentials` command
+    Test `d3b-clients dewrangle upsert-credential` command
+    Test `d3b-clients dewrangle delete-credential` command
+    Test `d3b-clients dewrangle read-credentials` command
     """
     study, _ = dewrangle_study
     runner = CliRunner()
@@ -121,7 +121,7 @@ def test_crud_credential(tmp_path, dewrangle_study):
 
 def test_delete_credential_bad_input():
     """
-    Test `d3b dewrangle delete-credential` command
+    Test `d3b-clients dewrangle delete-credential` command
     """
     runner = CliRunner()
     result = runner.invoke(delete_credential, [], standalone_mode=False)

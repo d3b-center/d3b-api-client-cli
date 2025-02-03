@@ -13,9 +13,9 @@ from d3b_api_client_cli.dewrangle.graphql import study
 
 def test_crud_study(tmp_path, dewrangle_study):
     """
-    Test `d3b dewrangle upsert-study` command
-    Test `d3b dewrangle read-studies` command
-    Test `d3b dewrangle delete-study` command
+    Test `d3b-clients dewrangle upsert-study` command
+    Test `d3b-clients dewrangle read-studies` command
+    Test `d3b-clients dewrangle delete-study` command
     """
     study_obj, fp = dewrangle_study
 

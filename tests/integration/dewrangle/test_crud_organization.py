@@ -14,7 +14,7 @@ from d3b_api_client_cli.dewrangle.graphql import organization
 
 def test_upsert_organization(tmp_path, organization_file):
     """
-    Test `d3b dewrangle upsert-organization` command
+    Test `d3b-clients dewrangle upsert-organization` command
     """
     # Create
     fp = organization_file()
@@ -45,7 +45,7 @@ def test_upsert_organization(tmp_path, organization_file):
 
 def test_read_organization(tmp_path):
     """
-    Test `d3b dewrangle read-organizations` command
+    Test `d3b-clients dewrangle read-organizations` command
     """
     temp_dir = tmp_path / "output"
     temp_dir.mkdir()
@@ -61,7 +61,7 @@ def test_read_organization(tmp_path):
 
 def test_delete_organization_safety_check_on():
     """
-    Test `d3b dewrangle delete-organization` command
+    Test `d3b-clients dewrangle delete-organization` command
     with safety check enabled for delete
     """
     orgs = organization.read_organizations()
@@ -89,7 +89,7 @@ def test_delete_organization_safety_check_on():
 
 def test_delete_organization_safety_check_off():
     """
-    Test `d3b dewrangle delete-organization` command
+    Test `d3b-clients dewrangle delete-organization` command
     with safety check disabled for delete
     """
     orgs = organization.read_organizations()

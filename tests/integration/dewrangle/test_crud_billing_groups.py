@@ -38,9 +38,9 @@ def test_org(organization_file):
 
 def test_crud_billing_group(tmp_path, test_org):
     """
-    Test `d3b dewrangle create-billing-group` command
-    Test `d3b dewrangle read-billing-groups` command
-    Test `d3b dewrangle delete-billing-group` command
+    Test `d3b-clients dewrangle create-billing-group` command
+    Test `d3b-clients dewrangle read-billing-groups` command
+    Test `d3b-clients dewrangle delete-billing-group` command
     """
     org, _ = test_org
 

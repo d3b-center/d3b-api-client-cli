@@ -62,7 +62,7 @@ config = {
         "billing_group_id": os.environ.get("CAVATICA_BILLING_GROUP_ID"),
     },
     "aws": {
-        "region": os.environ.get("AWS_DEFAULT_REGION"),
+        "region": os.environ.get("AWS_DEFAULT_REGION") or "us-east-1",
         "s3": {
             "aws_access_key_id": os.environ.get("AWS_ACCESS_KEY_ID"),
             "aws_secret_access_key": os.environ.get("AWS_SECRET_ACCESS_KEY"),

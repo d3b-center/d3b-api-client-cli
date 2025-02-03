@@ -19,7 +19,7 @@ AWS_BUCKET_DATA_TRANSFER_TEST = config["aws"]["s3"]["test_bucket_name"]
 
 def test_upsert_volume_bad_input():
     """
-    Test `d3b dewrangle upsert-volume` command
+    Test `d3b-clients dewrangle upsert-volume` command
     """
     runner = CliRunner()
 
@@ -35,9 +35,9 @@ def test_upsert_volume_bad_input():
 
 def test_crud_volume(tmp_path, dewrangle_credential):
     """
-    Test `d3b dewrangle upsert-volume` command
-    Test `d3b dewrangle delete-volume` command
-    Test `d3b dewrangle read-volumes` command
+    Test `d3b-clients dewrangle upsert-volume` command
+    Test `d3b-clients dewrangle delete-volume` command
+    Test `d3b-clients dewrangle read-volumes` command
     """
     study_id = dewrangle_credential["study_id"]
     runner = CliRunner()
@@ -118,7 +118,7 @@ def test_crud_volume(tmp_path, dewrangle_credential):
 
 def test_delete_volume_bad_input():
     """
-    Test `d3b dewrangle delete-volume` command
+    Test `d3b-clients dewrangle delete-volume` command
     """
     runner = CliRunner()
     result = runner.invoke(delete_volume, [], standalone_mode=False)
