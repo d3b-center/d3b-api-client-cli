@@ -8,7 +8,6 @@ import click
 
 from d3b_api_client_cli.config import config
 from d3b_api_client_cli.config.log import init_logger
-from d3b_api_client_cli.utils import read_json
 from d3b_api_client_cli.dewrangle import graphql as gql_client
 
 logger = logging.getLogger(__name__)
