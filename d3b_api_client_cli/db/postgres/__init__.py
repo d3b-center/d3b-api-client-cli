@@ -17,7 +17,7 @@ class DBConnectionParam:
     Encapsulates Params needed to establish a DB connection
     """
 
-    user_name: str
+    username: str
     password: str
     hostname: str
     port: str

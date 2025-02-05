@@ -5,6 +5,7 @@ import pandas as pd
 from psycopg2 import connect, sql
 
 from d3b_api_client_cli.db.postgres.save import save_df_to_db
+from d3b_api_client_cli.db.postgres.admin import create_db_schema
 from d3b_api_client_cli.db.postgres import DBConnectionParam
 
 TEST_SCHEMA = "TEST_SCHEMA"
@@ -43,20 +44,22 @@ def test_df_to_db(postgres_db, test_dataframe):
         db_user, db_password, db_host, db_port, db_name
     )
 
-    save_df_to_db(
-        test_dataframe,
-        TEST_SCHEMA,
-        "test_table",
-        primary_key_columns=[],
-        db_conn_args=db_params,
-    )
-
     conn = connect(
         dbname=db_name,
         user=db_user,
         password=db_password,
         host=db_host,
         port=db_port,
+    )
+
+    create_db_schema(conn, TEST_SCHEMA)
+
+    save_df_to_db(
+        test_dataframe,
+        TEST_SCHEMA,
+        "test_table",
+        primary_key_columns=[],
+        db_conn_args=db_params,
     )
 
     query = sql.SQL(
