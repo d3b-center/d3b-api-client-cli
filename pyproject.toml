@@ -20,6 +20,8 @@ dependencies = [
   "gql[aiohttp]==3.5.0",
   "requests==2.32.3",
   "pandas==2.2.3",
+  "psycopg2-binary==2.9.10",
+  "sqlalchemy==2.0.36",
 ]
 
 [project.optional-dependencies]
