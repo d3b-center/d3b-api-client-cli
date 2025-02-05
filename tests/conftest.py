@@ -5,6 +5,7 @@ Reusable fixtures and helpers for all tests
 import os
 import pytest
 from click.testing import CliRunner
+from testcontainers.postgres import PostgresContainer
 
 from d3b_api_client_cli.utils import write_json
 
@@ -19,6 +20,8 @@ from d3b_api_client_cli.config import config
 AWS_ACCESS_KEY_ID = config["aws"]["s3"]["aws_access_key_id"]
 AWS_SECRET_ACCESS_KEY = config["aws"]["s3"]["aws_secret_access_key"]
 AWS_BUCKET_DATA_TRANSFER_TEST = config["aws"]["s3"]["test_bucket_name"]
+
+POSTGRES_DB_IMAGE = "postgres:16-alpine"
 
 
 @pytest.fixture(scope="session")
@@ -183,3 +186,23 @@ def make_dewrangle_volume(dewrangle_credential):
         return volume
 
     return _make_volume
+
+
+# Postgres DB Fixtures
+@pytest.fixture(scope="module")
+def postgres_db(request):
+    """
+    Fixture to create Postgres testcontainer for integration testing
+    """
+    postgres = PostgresContainer(POSTGRES_DB_IMAGE)
+    postgres.start()
+
+    def remove_container():
+        postgres.stop()
+
+    request.addfinalizer(remove_container)
+    os.environ["DB_HOST"] = postgres.get_container_host_ip()
+    os.environ["DB_PORT"] = postgres.get_exposed_port(5432)
+    os.environ["DB_NAME"] = postgres.dbname
+    os.environ["DB_USER"] = postgres.username
+    os.environ["DB_USER_PW"] = postgres.password

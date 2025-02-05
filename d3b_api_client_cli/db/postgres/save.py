@@ -96,7 +96,14 @@ def save_file_to_db(
     logger.info("Streaming file %s into db table %s...", filename, table_name)
     for _, df in enumerate(chunked_dataframe_reader(filepath, batch_size)):
         # Bulk insert rows into db table
-        save_df_to_db(df, schema_name, table_name, [], sqla_engine)
+        save_df_to_db(
+            df,
+            schema_name,
+            table_name,
+            [],
+            sqla_engine,
+            upsert_rows=upsert_rows,
+        )
         count += df.shape[0]
         logger.info("-- Loaded %d total rows", count)
 
