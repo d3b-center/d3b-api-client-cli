@@ -1,3 +1,7 @@
+"""
+Postgres CLI commands
+"""
+
 import logging
 
 import click

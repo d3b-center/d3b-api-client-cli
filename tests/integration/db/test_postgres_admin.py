@@ -1,7 +1,9 @@
-import os
-import pytest
+"""
+Tests for postgres admin commands
+"""
 
-import pandas as pd
+import os
+
 from psycopg2 import connect, sql
 
 from d3b_api_client_cli.db.postgres.admin import (
