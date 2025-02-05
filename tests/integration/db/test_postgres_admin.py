@@ -19,12 +19,11 @@ def test_create_db_schema(postgres_db):
     """
     Test Create DB Schema
     """
-
-    db_host = os.environ.get("D3B_WAREHOUSE_HOST")
-    db_port = os.environ.get("D3B_WAREHOUSE_PORT")
-    db_name = os.environ.get("D3B_WAREHOUSE_DB_NAME")
-    db_user = os.environ.get("D3B_WAREHOUSE_DB_USER")
-    db_password = os.environ.get("D3B_WAREHOUSE_DB_USER_PW")
+    db_host = os.environ.get("DB_HOST")
+    db_port = os.environ.get("DB_PORT")
+    db_name = os.environ.get("DB_NAME")
+    db_user = os.environ.get("DB_USER")
+    db_password = os.environ.get("DB_USER_PW")
 
     conn = connect(
         dbname=db_name,
@@ -50,11 +49,12 @@ def test_create_db_user(postgres_db):
     """
     Test Create User in DB
     """
-    db_host = os.environ.get("D3B_WAREHOUSE_HOST")
-    db_port = os.environ.get("D3B_WAREHOUSE_PORT")
-    db_name = os.environ.get("D3B_WAREHOUSE_DB_NAME")
-    db_user = os.environ.get("D3B_WAREHOUSE_DB_USER")
-    db_password = os.environ.get("D3B_WAREHOUSE_DB_USER_PW")
+
+    db_host = os.environ.get("DB_HOST")
+    db_port = os.environ.get("DB_PORT")
+    db_name = os.environ.get("DB_NAME")
+    db_user = os.environ.get("DB_USER")
+    db_password = os.environ.get("DB_USER_PW")
 
     conn = connect(
         dbname=db_name,
