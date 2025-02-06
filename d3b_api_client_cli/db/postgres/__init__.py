@@ -24,8 +24,18 @@ class DBConnectionParam:
     db_name: str
 
     def __post_init__(self):
-        if any(value is None for value in vars(self).values()):
-            raise ValueError("❌ Not enough inputs to connect to database!")
+        if any(
+            value is None
+            for value in vars(self).values()
+            if not callable(value)
+        ):
+            display = {}
+            for k, v in vars(self).items():
+                display[k] = "*" * len(v) if ("password" in k) and v else v
+            raise ValueError(
+                "❌ Not enough inputs to connect to database!\n"
+                f"{pformat(display)}"
+            )
 
 
 def create_sqla_engine(db_conn: DBConnectionParam) -> sqlalchemy.Engine:

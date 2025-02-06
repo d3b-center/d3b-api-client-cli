@@ -73,32 +73,3 @@ def create_db_user(
                 password=sql.Literal(password),
             )
         )
-
-
-def grant_db_privileges(
-    conn: extensions.connection,
-    schema_name: str,
-    schema_owner: str,
-    username: str,
-) -> None:
-    """
-    Grants SELECT privileges to a user on a specified schema.
-
-    Args:
-        conn (psycopg2.connection): An existing connection object from psycopg2.connect.
-        schema_name (str): The name of the database schema to grant privileges on.
-        username (str): The username to grant SELECT privileges to.
-    """
-    with conn.cursor() as cursor:
-        conn.autocommit = True
-        query = sql.SQL(
-            "GRANT USAGE ON SCHEMA {schema_name} TO {username};"
-            "ALTER DEFAULT PRIVILEGES FOR USER {schema_owner} IN SCHEMA "
-            "{schema_name} "
-            "GRANT ALL ON TABLES TO {username};"
-        ).format(
-            username=sql.Identifier(username),
-            schema_owner=sql.Identifier(schema_owner),
-            schema_name=sql.Identifier(schema_name),
-        )
-        cursor.execute(query)

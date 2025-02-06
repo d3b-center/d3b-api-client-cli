@@ -59,7 +59,12 @@ def save_file_to_db(filepath, schema_name, table_name, upsert_rows, batch_size):
     )
 
     try:
-        logger.info("filepath %s, Schema %s", filepath, schema_name)
+        logger.info(
+            "Saving file %s to db: schema %s, table %s",
+            filepath,
+            schema_name,
+            table_name,
+        )
         _save_file_to_db(
             filepath,
             schema_name,
