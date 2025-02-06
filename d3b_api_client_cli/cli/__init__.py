@@ -6,6 +6,14 @@ All commands are initialized here
 
 import click
 from d3b_api_client_cli.cli.dewrangle import *
+from d3b_api_client_cli.cli.postgres import *
+
+
+@click.group()
+def postgres():
+    """
+    Group of lower level CLI commands related to working with Postgres DB
+    """
 
 
 @click.group()
@@ -26,6 +34,9 @@ def main():
     subcommands will implicitly be part of.
     """
 
+
+# Postgres API commands
+postgres.add_command(save_file_to_db)
 
 # Dewrangle API commands
 dewrangle.add_command(upsert_organization)
@@ -49,3 +60,4 @@ dewrangle.add_command(read_billing_groups)
 
 # Add command groups to the root CLI
 main.add_command(dewrangle)
+main.add_command(postgres)
