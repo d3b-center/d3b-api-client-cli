@@ -66,3 +66,46 @@ delete_study = gql(
     }
     """
 )
+
+upsert_global_descriptors = gql(
+    """
+    mutation globalDescriptorUpsertMutation(
+      $input: GlobalDescriptorUpsertInput!
+    ) {
+      globalDescriptorUpsert(input: $input) {
+        errors {
+          ... on MutationError {
+            __typename
+            message
+            field
+          }
+        }
+        job {
+          id
+          completedAt
+          globalDescriptors {
+            totalCount
+            edges {
+              node {
+                descriptor
+                globalId
+                fhirResourceType
+              }
+            }
+          }
+          errors {
+            totalCount
+            edges {
+              node {
+                name
+                message
+                isFatal
+              }
+            }
+          }
+        }
+      }
+    }
+    """
+)
+
