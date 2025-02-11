@@ -1,5 +1,5 @@
 """
-Test downloading volume hash files (error, hash report) from Dewrangle
+Test downloading volume hash files (job errors) from Dewrangle
 """
 
 import os
@@ -84,27 +84,8 @@ def test_download_job_errors(mocker):
     )
 
 
-def test_download_hash_report(mocker):
-    """
-    Test download Dewrangle volume hash report
-    """
-    mock_download_file = mocker.patch(
-        "d3b_api_client_cli.dewrangle.rest.files.download_file"
-    )
-
-    files.download_hash_report("job-id", output_dir="output")
-
-    endpoint_template = config["dewrangle"]["endpoints"]["rest"]["hash_report"]
-    endpoint = endpoint_template.format(job_id="job-id")
-    url = f"{DEWRANGLE_BASE_URL.rstrip('/')}/{endpoint.lstrip('/')}"
-
-    mock_download_file.assert_called_with(
-        url, output_dir="output", filepath=None
-    )
-
-
 @pytest.mark.parametrize(
-    "download_method", [files.download_job_errors, files.download_hash_report]
+    "download_method", [files.download_job_errors]
 )
 @pytest.mark.parametrize(
     "token,url, expected_msg",
