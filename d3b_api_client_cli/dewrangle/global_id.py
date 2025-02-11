@@ -89,6 +89,8 @@ def upsert_global_descriptors(
     )
     result = resp["globalDescriptorUpsert"]
     job_id = result["job"]["id"]
+    result["study_global_id"] = study_global_id
+    result["study_id"] = study["id"]
 
     logger.info(
         "✅ Completed request to upsert global IDs. Job ID: %s", job_id)
