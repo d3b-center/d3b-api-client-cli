@@ -7,6 +7,14 @@ All commands are initialized here
 import click
 from d3b_api_client_cli.cli.dewrangle import *
 from d3b_api_client_cli.cli.postgres import *
+from d3b_api_client_cli.cli.faker import *
+
+
+@click.group()
+def faker():
+    """
+    Group of lower level CLI commands related to generating fake data 
+    """
 
 
 @click.group()
@@ -35,6 +43,9 @@ def main():
     """
 
 
+# Fake data commands
+faker.add_command(generate_global_id_file)
+
 # Postgres API commands
 postgres.add_command(save_file_to_db)
 
@@ -61,3 +72,4 @@ dewrangle.add_command(read_billing_groups)
 # Add command groups to the root CLI
 main.add_command(dewrangle)
 main.add_command(postgres)
+main.add_command(faker)
