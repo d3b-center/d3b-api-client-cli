@@ -2,11 +2,14 @@
 Dewrangle functions to create, update, remove global descriptors in Dewrangle 
 """
 
+from enum import Enum
 from typing import Optional
+from pprint import pformat
 import logging
 import os
 
 from d3b_api_client_cli.dewrangle.graphql import study as study_api
+from d3b_api_client_cli.dewrangle.rest.files import download_file
 
 from d3b_api_client_cli.config import (
     config,
@@ -14,8 +17,6 @@ from d3b_api_client_cli.config import (
 )
 from d3b_api_client_cli.dewrangle.rest import (
     upload_study_file,
-    download_global_descriptors,
-    GlobalIdDescriptorOptions
 )
 from d3b_api_client_cli.utils import timestamp
 
@@ -24,6 +25,14 @@ logger = logging.getLogger(__name__)
 CSV_CONTENT_TYPE = "text/csv"
 DEWRANGLE_BASE_URL = config["dewrangle"]["base_url"].rstrip("/")
 DEFAULT_FILENAME = f"dewrangle-file-{timestamp()}.csv"
+
+
+class GlobalIdDescriptorOptions(Enum):
+    """
+    Used in download_global_descriptors 
+    """
+    DOWNLOAD_ALL_DESC = "all"
+    DOWNLOAD_MOST_RECENT = "most-recent"
 
 
 def upsert_and_download_global_descriptors(
@@ -133,7 +142,7 @@ def upsert_global_descriptors(
     url = f"{base_url}/{endpoint}"
     logger.info("🛸 POST global IDs file %s to Dewrangle %s", filepath, url)
 
-    result = upload_study_file(dewrangle_study_id, filepath)
+    result = upload_study_file(dewrangle_study_id, filepath=filepath)
     study_file_id = result["id"]
 
     # Trigger global descriptor upsert mutation
@@ -152,3 +161,86 @@ def upsert_global_descriptors(
     )
 
     return result
+
+
+def download_global_descriptors(
+    dewrangle_study_id: Optional[str] = None,
+    study_global_id: Optional[str] = None,
+    job_id: Optional[str] = None,
+    descriptors: Optional[GlobalIdDescriptorOptions] = None,  # noqa
+    filepath: Optional[str] = None,
+    output_dir: Optional[str] = None,
+) -> str:
+    """
+    Download study's global IDs from Dewrangle
+
+    Args:
+        - dewrangle_study_id: GraphQL ID of study in Dewrangle
+        - filepath: GraphQL ID of study in Dewrangle
+    Options:
+        - job_id: The job ID returned from the upsert_global_descriptors 
+                  method. If this is provided, only global IDs from that
+                  job will be returned.
+
+        - descriptors: A query parameter that determines how many descriptors 
+                       will be returned for the global ID. 
+
+                       If set to "all" return all descriptors associated 
+                       with the global ID
+
+                       If set to "most-recent" return the most recent
+                       descriptor associated with the global ID
+
+        - filepath: If filepath is provided, download content to that filepath
+
+        - output_dir: If output_dir is provided, get filename from
+                      Content-Disposition header and download the file to the
+                      output directory with that filename
+    """
+    if dewrangle_study_id:
+        study = study_api.read_study(dewrangle_study_id)
+    else:
+        study = study_api.find_study(study_global_id)
+
+    if not study:
+        raise ValueError(
+            f"❌ Study "
+            f"{study_global_id if study_global_id else dewrangle_study_id}"
+            " does not exist in Dewrangle. Aborting"
+        )
+
+    study_global_id = study["globalId"]
+    dewrangle_study_id = study["id"]
+
+    if not descriptors:
+        descriptors = GlobalIdDescriptorOptions.DOWNLOAD_ALL_DESC.value
+
+    base_url = config["dewrangle"]["base_url"]
+    endpoint_template = config["dewrangle"]["endpoints"]["rest"]["global_id"]
+    endpoint = endpoint_template.format(dewrangle_study_id=dewrangle_study_id)
+    url = f"{base_url}/{endpoint}"
+
+    params = {}
+    if job_id:
+        params.update({"job": job_id})
+    if descriptors:
+        params.update({"descriptors": descriptors})
+
+    logger.info(
+        "🛸 Start download of global IDs for study %s from Dewrangle: %s"
+        " Params: %s",
+        study_global_id,
+        url,
+        pformat(params)
+    )
+
+    filepath = download_file(
+        url,
+        output_dir=output_dir,
+        filepath=filepath,
+        params=params
+    )
+
+    logger.info("✅ Completed download of global IDs: %s", filepath)
+
+    return filepath
