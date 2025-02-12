@@ -11,7 +11,8 @@ import pandas
 from d3b_api_client_cli.cli.dewrangle.global_id_commands import (
     upsert_global_descriptors,
     download_global_descriptors,
-    upsert_and_download_global_descriptors
+    upsert_and_download_global_descriptors,
+    upsert_and_download_global_descriptor,
 )
 from d3b_api_client_cli.dewrangle.global_id import (
     upsert_global_descriptors as _upsert_global_descriptors
@@ -143,3 +144,40 @@ def test_download_all_descriptors(dewrangle_study):
 
     # Should have double the descriptors plus one for the study
     assert df.shape[0] == 21
+
+
+def test_one_upsert_and_download_global_descriptor(
+    downloaded_global_descriptors
+):
+    """
+    Test d3b-clients dewrangle upsert-and-download-global-descriptor
+    """
+    study_id, filepath = downloaded_global_descriptors
+    output_dir = os.path.dirname(filepath)
+
+    # Get an existing global ID
+    df = pandas.read_csv(filepath)
+    row = df.to_dict(orient="records")[0]
+
+    runner = CliRunner()
+
+    # Upsert and download the descriptors
+    result = runner.invoke(
+        upsert_and_download_global_descriptor,
+        [
+            "--descriptor",
+            "foo",
+            "--fhir-resource-type",
+            row["fhirResourceType"],
+            "--global-id",
+            row["globalId"],
+            "--study-id", study_id,
+            "--output-dir", output_dir
+        ],
+        standalone_mode=False,
+    )
+    assert result.exit_code == 0
+    filepath = result.return_value
+
+    df = pandas.read_csv(filepath)
+    assert df.shape[0] == 1
