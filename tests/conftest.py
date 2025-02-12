@@ -22,7 +22,7 @@ AWS_SECRET_ACCESS_KEY = config["aws"]["s3"]["aws_secret_access_key"]
 AWS_BUCKET_DATA_TRANSFER_TEST = config["aws"]["s3"]["test_bucket_name"]
 
 POSTGRES_DB_IMAGE = "postgres:16-alpine"
-
+ORG_NAME = "Integration Test d3b-api-client-cli"
 
 @pytest.fixture(scope="session")
 def organization_file(tmp_path_factory):
@@ -30,7 +30,7 @@ def organization_file(tmp_path_factory):
     Write the inputs to create a Dewrangle Organization to file
     """
 
-    def create_and_write_org(org_name="TestOrg"):
+    def create_and_write_org(org_name=ORG_NAME):
         data_dir = tmp_path_factory.mktemp("data")
         org_filepath = os.path.join(data_dir, "Organization.json")
         org = {
