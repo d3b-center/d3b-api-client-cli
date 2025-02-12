@@ -46,7 +46,8 @@ def test_generate_global_ids(tmp_path):
     # With global IDs
     filepath = _generate_global_id_file(
         starting_index=250,
-        output_dir=temp_dir
+        output_dir=temp_dir,
+        with_global_ids=True,
     )
     df = pandas.read_csv(filepath)
 

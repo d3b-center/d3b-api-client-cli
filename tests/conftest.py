@@ -22,7 +22,8 @@ AWS_SECRET_ACCESS_KEY = config["aws"]["s3"]["aws_secret_access_key"]
 AWS_BUCKET_DATA_TRANSFER_TEST = config["aws"]["s3"]["test_bucket_name"]
 
 POSTGRES_DB_IMAGE = "postgres:16-alpine"
-ORG_NAME = "Integration Test d3b-api-client-cli"
+ORG_NAME = "Integration Tests d3b-api-client-cli"
+
 
 @pytest.fixture(scope="session")
 def organization_file(tmp_path_factory):
@@ -72,7 +73,7 @@ def dewrangle_org(organization_file):
     """
     Upsert an Organization in Dewrangle for other tests to use
     """
-    fp = organization_file(org_name="Integration Tests")
+    fp = organization_file()
     runner = CliRunner()
     result = runner.invoke(upsert_organization, [fp], standalone_mode=False)
     assert result.exit_code == 0
@@ -93,7 +94,8 @@ def dewrangle_study(dewrangle_org, study_file):
     fp = study_file()
 
     runner = CliRunner()
-    result = runner.invoke(upsert_study, [fp, org["id"]], standalone_mode=False)
+    result = runner.invoke(
+        upsert_study, [fp, org["id"]], standalone_mode=False)
     return result.return_value, fp
 
 

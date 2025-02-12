@@ -10,6 +10,7 @@ from click.testing import CliRunner
 from d3b_api_client_cli.utils import read_json, write_json
 from d3b_api_client_cli.cli import *
 from d3b_api_client_cli.dewrangle.graphql import organization
+from tests.conftest import ORG_NAME
 
 
 def test_upsert_organization(tmp_path, organization_file):
@@ -17,7 +18,7 @@ def test_upsert_organization(tmp_path, organization_file):
     Test `d3b-clients dewrangle upsert-organization` command
     """
     # Create
-    fp = organization_file()
+    fp = organization_file(org_name=ORG_NAME + " 2")
     organization = read_json(fp)
     runner = CliRunner()
     result = runner.invoke(upsert_organization, [fp], standalone_mode=False)
