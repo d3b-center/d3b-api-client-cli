@@ -8,7 +8,7 @@ import logging
 import click
 
 from d3b_api_client_cli.config import log
-from d3b_api_client_cli.dewrangle.rest.files import GlobalIdDescriptorOptions
+from d3b_api_client_cli.dewrangle.global_id import GlobalIdDescriptorOptions
 from d3b_api_client_cli.dewrangle.global_id import (
     upsert_global_descriptors as _upsert_global_descriptors,
     download_global_descriptors as _download_global_descriptors,

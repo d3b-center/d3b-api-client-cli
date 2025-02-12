@@ -68,6 +68,9 @@ dewrangle.add_command(read_job)
 dewrangle.add_command(create_billing_group)
 dewrangle.add_command(delete_billing_group)
 dewrangle.add_command(read_billing_groups)
+dewrangle.add_command(upsert_global_descriptors)
+dewrangle.add_command(download_global_descriptors)
+dewrangle.add_command(upsert_and_download_global_descriptors)
 
 # Add command groups to the root CLI
 main.add_command(dewrangle)
