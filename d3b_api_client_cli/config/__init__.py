@@ -80,7 +80,8 @@ config = {
         "endpoints": {
             "graphql": "/api/graphql",
             "rest": {
-                "hash_report": "/api/rest/jobs/{job_id}/report/volume-hash",
+                "study_file": "api/rest/studies/{dewrangle_study_id}/files/{filename}",
+                "global_id": "api/rest/studies/{dewrangle_study_id}/global-descriptors",
                 "job_errors": "/api/rest/jobs/{job_id}/errors",
             },
         },

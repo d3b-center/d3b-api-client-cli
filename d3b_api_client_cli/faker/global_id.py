@@ -6,7 +6,6 @@ import os
 from typing import Optional
 from pprint import pformat
 import logging
-import random
 
 import pandas
 
@@ -21,6 +20,26 @@ FHIR_RESOURCE_TYPES: dict[
 DEFAULT_FHIR_RESOURCE_TYPE: str = "DocumentReference"
 
 logger = logging.getLogger(__name__)
+
+
+def _generate_fake_global_id(
+    prefix: str, starting_index: Optional[int] = 0
+) -> str:
+    """
+    Generate a fake Dewrangle global ID
+    """
+    starting_index = str(starting_index)
+
+    if not starting_index.isdigit():
+        raise ValueError("Starting index must contain only digits.")
+
+    if len(starting_index) > 10:
+        raise ValueError("Starting index cannot be longer than 10 digits.")
+
+    remaining_length = 10 - len(starting_index)
+    remaining = "0" * remaining_length
+
+    return f"{prefix}-{str(starting_index)}{remaining}"
 
 
 def generate_global_id_file(
@@ -75,13 +94,17 @@ def generate_global_id_file(
 
     data = []
     for i in range(total_rows):
-        index = i + starting_index
+        rt = fhir_resource_type.resource_type
+        global_id = _generate_fake_global_id(
+            fhir_resource_type.id_prefix, starting_index + i
+        )
+        descriptor_suffix = global_id.split("-")[-1]
         row = {
             "fhirResourceType": fhir_resource_type.resource_type,
-            "descriptor": f"{fhir_resource_type.resource_type}-{index}"
+            "descriptor": f"{rt}-{descriptor_suffix}"
         }
         if with_global_ids:
-            row["globalId"] = f"{fhir_resource_type.id_prefix}-{index}000"
+            row["globalId"] = global_id
         data.append(row)
 
         logger.info("Wrote %s to file", pformat(row))

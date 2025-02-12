@@ -177,6 +177,7 @@ def download_global_descriptors(
     Args:
         - dewrangle_study_id: GraphQL ID of study in Dewrangle
         - filepath: GraphQL ID of study in Dewrangle
+
     Options:
         - job_id: The job ID returned from the upsert_global_descriptors 
                   method. If this is provided, only global IDs from that
@@ -220,9 +221,12 @@ def download_global_descriptors(
     endpoint = endpoint_template.format(dewrangle_study_id=dewrangle_study_id)
     url = f"{base_url}/{endpoint}"
 
+    # Download global IDs associated with this job only
     params = {}
     if job_id:
         params.update({"job": job_id})
+
+    # Download all descriptors associated with each affected global id
     if descriptors:
         params.update({"descriptors": descriptors})
 

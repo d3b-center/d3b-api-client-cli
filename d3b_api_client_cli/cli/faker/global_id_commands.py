@@ -26,7 +26,7 @@ DEFAULT_FHIR_RESOURCE_TYPE: FhirResourceType = FHIR_RESOURCE_TYPES["DocumentRefe
 @click.option(
     "--fhir-resource-type",
     default=DEFAULT_FHIR_RESOURCE_TYPE.resource_type,
-    type=click.Choice(rt for rt in FHIR_RESOURCE_TYPES.keys()),
+    type=click.Choice([rt for rt in FHIR_RESOURCE_TYPES.keys()]),
     help="What the fhirResourceType column will be populated with"
 )
 @click.option(
