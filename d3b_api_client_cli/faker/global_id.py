@@ -44,7 +44,7 @@ def _generate_fake_global_id(
 
 def generate_global_id_file(
     fhir_resource_type: Optional[str] = DEFAULT_FHIR_RESOURCE_TYPE,
-    with_global_ids: Optional[bool] = True,
+    with_global_ids: Optional[bool] = False,
     total_rows: Optional[int] = 10,
     starting_index: Optional[int] = 0,
     output_dir: Optional[str] = None

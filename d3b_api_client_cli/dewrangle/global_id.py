@@ -37,8 +37,8 @@ class GlobalIdDescriptorOptions(Enum):
 
 def upsert_and_download_global_descriptors(
     input_filepath: str,
-    study_global_id: Optional[str],
-    dewrangle_study_id: Optional[str],
+    study_global_id: Optional[str] = None,
+    dewrangle_study_id: Optional[str] = None,
     skip_unavailable_descriptors: Optional[bool] = True,
     descriptors: Optional[GlobalIdDescriptorOptions] = GlobalIdDescriptorOptions.DOWNLOAD_ALL_DESC.value,  # noqa
     output_dir: Optional[str] = None,
