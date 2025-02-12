@@ -8,12 +8,15 @@ from pprint import pformat
 import logging
 import os
 
+import pandas
+
 from d3b_api_client_cli.dewrangle.graphql import study as study_api
 from d3b_api_client_cli.dewrangle.rest.files import download_file
 
 from d3b_api_client_cli.config import (
     config,
-    ROOT_DATA_DIR
+    ROOT_DATA_DIR,
+    FhirResourceType
 )
 from d3b_api_client_cli.dewrangle.rest import (
     upload_study_file,
@@ -33,6 +36,68 @@ class GlobalIdDescriptorOptions(Enum):
     """
     DOWNLOAD_ALL_DESC = "all"
     DOWNLOAD_MOST_RECENT = "most-recent"
+
+
+def upsert_and_download_global_descriptor(
+    descriptor: str,
+    fhir_resource_type: FhirResourceType,
+    global_id: Optional[str] = None,
+    study_global_id: Optional[str] = None,
+    dewrangle_study_id: Optional[str] = None,
+    skip_unavailable_descriptors: Optional[bool] = True,
+    download_all: Optional[bool] = True,
+    output_dir: Optional[str] = None,
+    output_filepath: Optional[str] = None,
+) -> str:
+    """
+    Upsert a single global descriptor and download created/updated 
+    global descriptors and ID from Dewrangle
+
+    Args:
+        See upsert_global_descriptors and
+        d3b_api_client_cli.dewrangle.rest.download_global_descriptors
+
+    Options:
+        See upsert_global_descriptors and
+        d3b_api_client_cli.dewrangle.rest.download_global_descriptors
+
+    Returns:
+        filepath: path to downloaded global ID descriptors
+    """
+    if not output_dir:
+        output_dir = os.path.join(ROOT_DATA_DIR)
+        os.makedirs(output_dir, exist_ok=True)
+
+    if study_global_id:
+        s_id = study_global_id
+    else:
+        s_id = dewrangle_study_id
+
+    filepath = os.path.join(output_dir, f"global-descriptors-{s_id}.csv")
+
+    logger.info("✏️  Preparing to upsert single global descriptor ...")
+    logger.info(
+        "Writing parameters to file %s", filepath
+    )
+
+    row = {
+        "descriptor": descriptor,
+        "fhirResourceType": fhir_resource_type
+    }
+    if global_id:
+        row["globalId"] = global_id
+
+    pandas.DataFrame([row]).to_csv(filepath, index=False)
+
+    return upsert_and_download_global_descriptors(
+        filepath,
+        study_global_id=study_global_id,
+        dewrangle_study_id=dewrangle_study_id,
+        skip_unavailable_descriptors=skip_unavailable_descriptors,
+        download_all=download_all,
+        output_dir=output_dir,
+        output_filepath=output_filepath,
+    )
 
 
 def upsert_and_download_global_descriptors(
