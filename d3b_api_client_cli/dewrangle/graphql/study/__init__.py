@@ -53,6 +53,20 @@ def upsert_global_descriptors(
     }
     resp = exec_query(mutations.upsert_global_descriptors, variables=variables)
 
+    key = "globalDescriptorUpsert"
+    mutation_errors = resp.get(key, {}).get("errors")
+    job_errors = resp.get(key, {}).get(
+        "job", {}).get("errors", {}).get("edges", [])
+
+    if mutation_errors or job_errors:
+        logger.error("❌ %s for study failed", key)
+        if mutation_errors:
+            logger.error("❌ Mutation Errors:\n%s", pformat(mutation_errors))
+        if job_errors:
+            logger.error("❌ Job Errors:\n%s", pformat(job_errors))
+    else:
+        logger.info("✅ %s for study succeeded:\n%s", key, pformat(resp))
+
     return resp
 
 
