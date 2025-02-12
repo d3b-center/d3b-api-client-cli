@@ -18,6 +18,7 @@ from d3b_api_client_cli.dewrangle.global_id import (
 logger = logging.getLogger(__name__)
 
 
+
 @click.command()
 @click.option(
     "--output-filepath",
@@ -33,11 +34,9 @@ logger = logging.getLogger(__name__)
     "this directory"
 )
 @click.option(
-    "--descriptors",
-    type=click.Choice(
-        item.value for item in GlobalIdDescriptorOptions
-    ),
-    help="Which descriptor(s) for each global ID to download. Either download"
+    "--download-all",
+    is_flag=True,
+    help="What descriptor(s) for each global ID to download. Either download"
     " all descriptors for each global ID or just the most recent"
 )
 @click.option(
@@ -55,7 +54,7 @@ logger = logging.getLogger(__name__)
     type=click.Path(exists=False, file_okay=True, dir_okay=False),
 )
 def upsert_and_download_global_descriptors(
-    input_filepath, study_id, study_global_id, descriptors, output_dir,
+    input_filepath, study_id, study_global_id, download_all, output_dir,
     output_filepath
 ):
     """
@@ -86,7 +85,7 @@ def upsert_and_download_global_descriptors(
         input_filepath,
         study_global_id=study_global_id,
         dewrangle_study_id=study_id,
-        descriptors=descriptors,
+        download_all=download_all,
         output_dir=output_dir,
         output_filepath=output_filepath,
     )
@@ -143,11 +142,9 @@ def upsert_global_descriptors(filepath, study_id, study_global_id):
     "this directory"
 )
 @click.option(
-    "--descriptors",
-    type=click.Choice(
-        item.value for item in GlobalIdDescriptorOptions
-    ),
-    help="Which descriptor(s) for each global ID to download. Either download"
+    "--download-all",
+    is_flag=True,
+    help="What descriptor(s) for each global ID to download. Either download"
     " all descriptors for each global ID or just the most recent"
 )
 @click.option(
@@ -171,7 +168,7 @@ def upsert_global_descriptors(filepath, study_id, study_global_id):
     "precedence over --output-dir"
 )
 def download_global_descriptors(
-    filepath, study_id, study_global_id, job_id, descriptors, output_dir
+    filepath, study_id, study_global_id, job_id, download_all, output_dir
 ):
     """
     Download global ID descriptors in Dewrangle for a study.
@@ -185,12 +182,11 @@ def download_global_descriptors(
             "the study's GraphQL ID in Dewrangle"
         )
 
-
     return _download_global_descriptors(
         dewrangle_study_id=study_id,
         study_global_id=study_global_id,
         filepath=filepath,
         job_id=job_id,
-        descriptors=descriptors,
+        download_all=download_all,
         output_dir=output_dir,
     )

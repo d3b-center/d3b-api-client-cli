@@ -131,7 +131,7 @@ def test_download_all_descriptors(dewrangle_study):
         download_global_descriptors,
         [
             "--study-id", study["id"],
-            "--descriptors", "all",
+            "--download-all",
             "--output-dir", output_dir
         ],
         standalone_mode=False,

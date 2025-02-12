@@ -40,7 +40,7 @@ def upsert_and_download_global_descriptors(
     study_global_id: Optional[str] = None,
     dewrangle_study_id: Optional[str] = None,
     skip_unavailable_descriptors: Optional[bool] = True,
-    descriptors: Optional[GlobalIdDescriptorOptions] = GlobalIdDescriptorOptions.DOWNLOAD_ALL_DESC.value,  # noqa
+    download_all: Optional[bool] = True,
     output_dir: Optional[str] = None,
     output_filepath: Optional[str] = None,
 ) -> str:
@@ -76,7 +76,7 @@ def upsert_and_download_global_descriptors(
     filepath = download_global_descriptors(
         dewrangle_study_id=dewrangle_study_id,
         job_id=job_id,
-        descriptors=descriptors,
+        download_all=download_all,
         filepath=output_filepath,
         output_dir=output_dir,
     )
@@ -167,7 +167,7 @@ def download_global_descriptors(
     dewrangle_study_id: Optional[str] = None,
     study_global_id: Optional[str] = None,
     job_id: Optional[str] = None,
-    descriptors: Optional[GlobalIdDescriptorOptions] = None,  # noqa
+    download_all: Optional[bool] = True,
     filepath: Optional[str] = None,
     output_dir: Optional[str] = None,
 ) -> str:
@@ -183,13 +183,13 @@ def download_global_descriptors(
                   method. If this is provided, only global IDs from that
                   job will be returned.
 
-        - descriptors: A query parameter that determines how many descriptors 
-                       will be returned for the global ID. 
+        - download_all: Determines how many descriptors 
+                        will be returned for the global ID. 
 
-                       If set to "all" return all descriptors associated 
+                       If True, return all descriptors associated
                        with the global ID
 
-                       If set to "most-recent" return the most recent
+                       If False, return the most recent
                        descriptor associated with the global ID
 
         - filepath: If filepath is provided, download content to that filepath
@@ -213,8 +213,10 @@ def download_global_descriptors(
     study_global_id = study["globalId"]
     dewrangle_study_id = study["id"]
 
-    if not descriptors:
+    if download_all:
         descriptors = GlobalIdDescriptorOptions.DOWNLOAD_ALL_DESC.value
+    else:
+        descriptors = GlobalIdDescriptorOptions.DOWNLOAD_MOST_RECENT.value
 
     base_url = config["dewrangle"]["base_url"]
     endpoint_template = config["dewrangle"]["endpoints"]["rest"]["global_id"]
