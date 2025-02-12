@@ -13,11 +13,7 @@ import pandas
 from d3b_api_client_cli.dewrangle.graphql import study as study_api
 from d3b_api_client_cli.dewrangle.rest.files import download_file
 
-from d3b_api_client_cli.config import (
-    config,
-    ROOT_DATA_DIR,
-    FhirResourceType
-)
+from d3b_api_client_cli.config import config, ROOT_DATA_DIR, FhirResourceType
 from d3b_api_client_cli.dewrangle.rest import (
     upload_study_file,
 )
@@ -32,8 +28,9 @@ DEFAULT_FILENAME = f"dewrangle-file-{timestamp()}.csv"
 
 class GlobalIdDescriptorOptions(Enum):
     """
-    Used in download_global_descriptors 
+    Used in download_global_descriptors
     """
+
     DOWNLOAD_ALL_DESC = "all"
     DOWNLOAD_MOST_RECENT = "most-recent"
 
@@ -50,7 +47,7 @@ def upsert_and_download_global_descriptor(
     output_filepath: Optional[str] = None,
 ) -> str:
     """
-    Upsert a single global descriptor and download created/updated 
+    Upsert a single global descriptor and download created/updated
     global descriptors and ID from Dewrangle
 
     Args:
@@ -76,14 +73,9 @@ def upsert_and_download_global_descriptor(
     filepath = os.path.join(output_dir, f"global-descriptors-{s_id}.csv")
 
     logger.info("✏️  Preparing to upsert single global descriptor ...")
-    logger.info(
-        "Writing parameters to file %s", filepath
-    )
+    logger.info("Writing parameters to file %s", filepath)
 
-    row = {
-        "descriptor": descriptor,
-        "fhirResourceType": fhir_resource_type
-    }
+    row = {"descriptor": descriptor, "fhirResourceType": fhir_resource_type}
     if global_id:
         row["globalId"] = global_id
 
@@ -110,7 +102,7 @@ def upsert_and_download_global_descriptors(
     output_filepath: Optional[str] = None,
 ) -> str:
     """
-    Send request to upsert global descriptors and download created/updated 
+    Send request to upsert global descriptors and download created/updated
     global descriptors and ID from Dewrangle
 
     Args:
@@ -167,11 +159,11 @@ def upsert_global_descriptors(
      descriptor already having a global ID assigned will be ignored
 
     Options:
-      - study_global_id - Provide this when you don't know the study's 
+      - study_global_id - Provide this when you don't know the study's
       GraphQL ID in Dewrangle.
       - study_id - Study GraphQL ID in Dewrangle
 
-      You must provide either the study_global_id OR the study_id but not both 
+      You must provide either the study_global_id OR the study_id but not both
 
     Raise:
         ValueError if the study does not exist in Dewrangle
@@ -193,7 +185,8 @@ def upsert_global_descriptors(
 
     logger.info(
         "🛸 Upsert global IDs in %s to Dewrangle for study %s",
-        filepath, study_global_id
+        filepath,
+        study_global_id,
     )
 
     filepath = os.path.abspath(filepath)
@@ -212,8 +205,7 @@ def upsert_global_descriptors(
 
     # Trigger global descriptor upsert mutation
     resp = study_api.upsert_global_descriptors(
-        study_file_id,
-        skip_unavailable_descriptors=skip_unavailable_descriptors
+        study_file_id, skip_unavailable_descriptors=skip_unavailable_descriptors
     )
     result = resp["globalDescriptorUpsert"]
     job_id = result["job"]["id"]
@@ -221,8 +213,7 @@ def upsert_global_descriptors(
     result["study_id"] = study["id"]
 
     logger.info(
-        "✅ Completed request to upsert global descriptors. Job ID: %s",
-        job_id
+        "✅ Completed request to upsert global descriptors. Job ID: %s", job_id
     )
 
     return result
@@ -244,12 +235,12 @@ def download_global_descriptors(
         - filepath: GraphQL ID of study in Dewrangle
 
     Options:
-        - job_id: The job ID returned from the upsert_global_descriptors 
+        - job_id: The job ID returned from the upsert_global_descriptors
                   method. If this is provided, only global IDs from that
                   job will be returned.
 
-        - download_all: Determines how many descriptors 
-                        will be returned for the global ID. 
+        - download_all: Determines how many descriptors
+                        will be returned for the global ID.
 
                        If True, return all descriptors associated
                        with the global ID
@@ -302,14 +293,11 @@ def download_global_descriptors(
         " Params: %s",
         study_global_id,
         url,
-        pformat(params)
+        pformat(params),
     )
 
     filepath = download_file(
-        url,
-        output_dir=output_dir,
-        filepath=filepath,
-        params=params
+        url, output_dir=output_dir, filepath=filepath, params=params
     )
 
     logger.info("✅ Completed download of global IDs: %s", filepath)

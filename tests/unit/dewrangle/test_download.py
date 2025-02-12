@@ -84,9 +84,7 @@ def test_download_job_errors(mocker):
     )
 
 
-@pytest.mark.parametrize(
-    "download_method", [files.download_job_errors]
-)
+@pytest.mark.parametrize("download_method", [files.download_job_errors])
 @pytest.mark.parametrize(
     "token,url, expected_msg",
     [

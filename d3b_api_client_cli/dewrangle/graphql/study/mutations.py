@@ -108,4 +108,3 @@ upsert_global_descriptors = gql(
     }
     """
 )
-

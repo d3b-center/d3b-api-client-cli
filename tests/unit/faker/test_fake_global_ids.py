@@ -1,6 +1,7 @@
 """
 Test generating fake data for global ID commands
 """
+
 import pytest
 from click.testing import CliRunner
 import pandas
@@ -8,19 +9,12 @@ import pandas
 from d3b_api_client_cli.cli.faker.global_id_commands import *
 from d3b_api_client_cli.faker.global_id import (
     generate_global_id_file as _generate_global_id_file,
-    DEFAULT_FHIR_RESOURCE_TYPE
+    DEFAULT_FHIR_RESOURCE_TYPE,
 )
 
 
 @pytest.mark.parametrize(
-    "kwargs,error_msg",
-    [
-        (
-            {
-                "fhir_resource_type": "foo"
-            }, "BadParameter"
-        )
-    ]
+    "kwargs,error_msg", [({"fhir_resource_type": "foo"}, "BadParameter")]
 )
 def test_generate_global_ids_errors(kwargs, error_msg):
     """
@@ -55,20 +49,20 @@ def test_generate_global_ids(tmp_path):
         assert c in df.columns
 
     assert df["fhirResourceType"].eq(DEFAULT_FHIR_RESOURCE_TYPE).all()
-    assert df["descriptor"].apply(
-        lambda d: int(d.split("-")[-1])
-    ).ge(250000).all()
+    assert (
+        df["descriptor"].apply(lambda d: int(d.split("-")[-1])).ge(250000).all()
+    )
 
     # Without global IDs
     filepath = _generate_global_id_file(
-        output_dir=temp_dir,
-        with_global_ids=False
+        output_dir=temp_dir, with_global_ids=False
     )
     df = pandas.read_csv(filepath)
     assert "globalId" not in df.columns
-    assert df["descriptor"].apply(
-        lambda d: int(d.split("-")[-1])
-    ).ge(0).all()
-    assert df["descriptor"].apply(
-        lambda d: int(d.split("-")[-1])
-    ).le(9000000000).all()
+    assert df["descriptor"].apply(lambda d: int(d.split("-")[-1])).ge(0).all()
+    assert (
+        df["descriptor"]
+        .apply(lambda d: int(d.split("-")[-1]))
+        .le(9000000000)
+        .all()
+    )

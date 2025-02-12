@@ -13,7 +13,7 @@ from d3b_api_client_cli.config import (
     DEWRANGLE_DEV_PAT,
     config,
     check_dewrangle_http_config,
-    ROOT_DATA_DIR
+    ROOT_DATA_DIR,
 )
 from d3b_api_client_cli.utils import send_request, timestamp
 
@@ -33,11 +33,7 @@ def _filename_from_headers(headers: dict) -> str:
     return params.get("filename")
 
 
-def upload_file(
-    url: str,
-    filepath: str,
-    params: Optional[dict] = None
-):
+def upload_file(url: str, filepath: str, params: Optional[dict] = None):
     """
     Upload a file to Dewrangle
     """
@@ -64,7 +60,7 @@ def download_file(
     url: str,
     output_dir: Optional[str] = None,
     filepath: Optional[str] = None,
-    params: Optional[dict] = None
+    params: Optional[dict] = None,
 ) -> str:
     """
     Download a file from Dewrangle
@@ -84,8 +80,7 @@ def download_file(
         output_dir = os.path.join(ROOT_DATA_DIR)
         os.makedirs(output_dir, exist_ok=True)
 
-    headers = {"x-api-key": DEWRANGLE_DEV_PAT,
-               "content-type": CSV_CONTENT_TYPE}
+    headers = {"x-api-key": DEWRANGLE_DEV_PAT, "content-type": CSV_CONTENT_TYPE}
     resp = send_request(
         "get",
         url,

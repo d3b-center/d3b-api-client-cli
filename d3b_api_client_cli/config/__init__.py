@@ -32,17 +32,17 @@ DB_USER_PW = os.environ.get("DB_USER_PW")
 @dataclass
 class FhirResourceType:
     """
-    Wrapper class to define a FHIR resource type along with a global ID 
+    Wrapper class to define a FHIR resource type along with a global ID
     prefix
     """
+
     resource_type: str
     id_prefix: str
 
 
 FHIR_RESOURCE_TYPES: dict = {
     resource_type: FhirResourceType(resource_type, prefix)
-    for resource_type, prefix in
-    [("DocumentReference", "dr")]
+    for resource_type, prefix in [("DocumentReference", "dr")]
 }
 
 
@@ -89,12 +89,7 @@ config = {
         "credential_type": "AWS",
         "billing_group_id": os.environ.get("CAVATICA_BILLING_GROUP_ID"),
     },
-    "faker": {
-        "global_id": {
-            "fhir_resource_types": FHIR_RESOURCE_TYPES
-        }
-
-    },
+    "faker": {"global_id": {"fhir_resource_types": FHIR_RESOURCE_TYPES}},
     "aws": {
         "region": os.environ.get("AWS_DEFAULT_REGION") or "us-east-1",
         "s3": {

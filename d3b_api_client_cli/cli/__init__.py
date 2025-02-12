@@ -13,7 +13,7 @@ from d3b_api_client_cli.cli.faker import *
 @click.group()
 def faker():
     """
-    Group of lower level CLI commands related to generating fake data 
+    Group of lower level CLI commands related to generating fake data
     """
 
 

@@ -15,7 +15,7 @@ from d3b_api_client_cli.cli.dewrangle.global_id_commands import (
     upsert_and_download_global_descriptor,
 )
 from d3b_api_client_cli.dewrangle.global_id import (
-    upsert_global_descriptors as _upsert_global_descriptors
+    upsert_global_descriptors as _upsert_global_descriptors,
 )
 from d3b_api_client_cli.faker.global_id import (
     generate_global_id_file,
@@ -25,7 +25,7 @@ from d3b_api_client_cli.faker.global_id import (
 @pytest.fixture(scope="session")
 def upserted_global_descriptors(dewrangle_study):
     """
-    Upsert global descriptors 
+    Upsert global descriptors
     """
     study, fp = dewrangle_study
     output_dir = os.path.dirname(fp)
@@ -59,8 +59,12 @@ def downloaded_global_descriptors(upserted_global_descriptors):
     result = runner.invoke(
         download_global_descriptors,
         [
-            "--study-id", study_id, "--job-id", job_id,
-            "--output-dir", output_dir
+            "--study-id",
+            study_id,
+            "--job-id",
+            job_id,
+            "--output-dir",
+            output_dir,
         ],
         standalone_mode=False,
     )
@@ -96,9 +100,7 @@ def test_upsert_and_download_global_descriptors(downloaded_global_descriptors):
     # Update the descriptors
     df = pandas.read_csv(filepath)
     df = df[[c for c in ("fhirResourceType", "descriptor", "globalId")]]
-    df["descriptor"] = df["descriptor"].apply(
-        lambda d: d + "1"
-    )
+    df["descriptor"] = df["descriptor"].apply(lambda d: d + "1")
     df.to_csv(filepath, index=False)
 
     runner = CliRunner()
@@ -106,11 +108,7 @@ def test_upsert_and_download_global_descriptors(downloaded_global_descriptors):
     # Upsert and download the descriptors
     result = runner.invoke(
         upsert_and_download_global_descriptors,
-        [
-            filepath,
-            "--study-id", study_id,
-            "--output-dir", output_dir
-        ],
+        [filepath, "--study-id", study_id, "--output-dir", output_dir],
         standalone_mode=False,
     )
     assert result.exit_code == 0
@@ -131,9 +129,11 @@ def test_download_all_descriptors(dewrangle_study):
     result = runner.invoke(
         download_global_descriptors,
         [
-            "--study-id", study["id"],
+            "--study-id",
+            study["id"],
             "--download-all",
-            "--output-dir", output_dir
+            "--output-dir",
+            output_dir,
         ],
         standalone_mode=False,
     )
@@ -147,7 +147,7 @@ def test_download_all_descriptors(dewrangle_study):
 
 
 def test_one_upsert_and_download_global_descriptor(
-    downloaded_global_descriptors
+    downloaded_global_descriptors,
 ):
     """
     Test d3b-clients dewrangle upsert-and-download-global-descriptor
@@ -171,8 +171,10 @@ def test_one_upsert_and_download_global_descriptor(
             row["fhirResourceType"],
             "--global-id",
             row["globalId"],
-            "--study-id", study_id,
-            "--output-dir", output_dir
+            "--study-id",
+            study_id,
+            "--output-dir",
+            output_dir,
         ],
         standalone_mode=False,
     )

@@ -33,8 +33,7 @@ DEWRANGLE_MAX_PAGE_SIZE = config["dewrangle"]["pagination"]["max_page_size"]
 
 
 def upsert_global_descriptors(
-    study_file_id: str,
-    skip_unavailable_descriptors: Optional[bool] = True
+    study_file_id: str, skip_unavailable_descriptors: Optional[bool] = True
 ) -> dict:
     """
     Trigger the operation to upsert global descriptors in Dewrangle
@@ -55,8 +54,9 @@ def upsert_global_descriptors(
 
     key = "globalDescriptorUpsert"
     mutation_errors = resp.get(key, {}).get("errors")
-    job_errors = resp.get(key, {}).get(
-        "job", {}).get("errors", {}).get("edges", [])
+    job_errors = (
+        resp.get(key, {}).get("job", {}).get("errors", {}).get("edges", [])
+    )
 
     if mutation_errors or job_errors:
         logger.error("❌ %s for study failed", key)

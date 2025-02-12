@@ -24,30 +24,30 @@ logger = logging.getLogger(__name__)
     "--output-filepath",
     type=click.Path(exists=False, file_okay=True, dir_okay=False),
     help="If provided, download the file to this path. This takes "
-    "precedence over the --output-dir option"
+    "precedence over the --output-dir option",
 )
 @click.option(
     "--output-dir",
     default=os.getcwd(),
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
     help="If provided, download the file with the default file name into "
-    "this directory"
+    "this directory",
 )
 @click.option(
     "--download-all",
     is_flag=True,
     help="What descriptor(s) for each global ID to download. Either download"
-    " all descriptors for each global ID or just the most recent"
+    " all descriptors for each global ID or just the most recent",
 )
 @click.option(
     "--study-global-id",
     help="The global ID of the study in Dewrangle. You must provide either "
-    "the global ID of the study OR the GraphQL ID of the study but not both"
+    "the global ID of the study OR the GraphQL ID of the study but not both",
 )
 @click.option(
     "--study-id",
     help="The GraphQL ID of the study in Dewrangle. You must provide either "
-    "the global ID of the study OR the GraphQL ID of the study but not both"
+    "the global ID of the study OR the GraphQL ID of the study but not both",
 )
 @click.option(
     "--global-id",
@@ -72,10 +72,10 @@ def upsert_and_download_global_descriptor(
     study_global_id,
     download_all,
     output_dir,
-    output_filepath
+    output_filepath,
 ):
     """
-    Send request to upsert one global ID descriptor in Dewrangle and 
+    Send request to upsert one global ID descriptor in Dewrangle and
     download the resulting global ID descriptors.
 
     In order to create new global IDs provide:
@@ -114,41 +114,45 @@ def upsert_and_download_global_descriptor(
     "--output-filepath",
     type=click.Path(exists=False, file_okay=True, dir_okay=False),
     help="If provided, download the file to this path. This takes "
-    "precedence over the --output-dir option"
+    "precedence over the --output-dir option",
 )
 @click.option(
     "--output-dir",
     default=os.getcwd(),
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
     help="If provided, download the file with the default file name into "
-    "this directory"
+    "this directory",
 )
 @click.option(
     "--download-all",
     is_flag=True,
     help="What descriptor(s) for each global ID to download. Either download"
-    " all descriptors for each global ID or just the most recent"
+    " all descriptors for each global ID or just the most recent",
 )
 @click.option(
     "--study-global-id",
     help="The global ID of the study in Dewrangle. You must provide either "
-    "the global ID of the study OR the GraphQL ID of the study but not both"
+    "the global ID of the study OR the GraphQL ID of the study but not both",
 )
 @click.option(
     "--study-id",
     help="The GraphQL ID of the study in Dewrangle. You must provide either "
-    "the global ID of the study OR the GraphQL ID of the study but not both"
+    "the global ID of the study OR the GraphQL ID of the study but not both",
 )
 @click.argument(
     "input_filepath",
     type=click.Path(exists=False, file_okay=True, dir_okay=False),
 )
 def upsert_and_download_global_descriptors(
-    input_filepath, study_id, study_global_id, download_all, output_dir,
-    output_filepath
+    input_filepath,
+    study_id,
+    study_global_id,
+    download_all,
+    output_dir,
+    output_filepath,
 ):
     """
-    Send request to upsert global ID descriptors in Dewrangle and 
+    Send request to upsert global ID descriptors in Dewrangle and
     download the resulting global ID descriptors.
 
     In order to create new global IDs provide a CSV file with the columns:
@@ -185,12 +189,12 @@ def upsert_and_download_global_descriptors(
 @click.option(
     "--study-global-id",
     help="The global ID of the study in Dewrangle. You must provide either "
-    "the global ID of the study OR the GraphQL ID of the study but not both"
+    "the global ID of the study OR the GraphQL ID of the study but not both",
 )
 @click.option(
     "--study-id",
     help="The GraphQL ID of the study in Dewrangle. You must provide either "
-    "the global ID of the study OR the GraphQL ID of the study but not both"
+    "the global ID of the study OR the GraphQL ID of the study but not both",
 )
 @click.argument(
     "filepath",
@@ -229,33 +233,32 @@ def upsert_global_descriptors(filepath, study_id, study_global_id):
     default=os.getcwd(),
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
     help="If provided, download the file with the default file name into "
-    "this directory"
+    "this directory",
 )
 @click.option(
     "--download-all",
     is_flag=True,
     help="What descriptor(s) for each global ID to download. Either download"
-    " all descriptors for each global ID or just the most recent"
+    " all descriptors for each global ID or just the most recent",
 )
 @click.option(
-    "--job-id",
-    help="Dewrangle job id from the upsert_global_descriptors cmd"
+    "--job-id", help="Dewrangle job id from the upsert_global_descriptors cmd"
 )
 @click.option(
     "--study-global-id",
     help="The global ID of the study in Dewrangle. You must provide either "
-    "the global ID of the study OR the GraphQL ID of the study but not both"
+    "the global ID of the study OR the GraphQL ID of the study but not both",
 )
 @click.option(
     "--study-id",
     help="The GraphQL ID of the study in Dewrangle. You must provide either "
-    "the global ID of the study OR the GraphQL ID of the study but not both"
+    "the global ID of the study OR the GraphQL ID of the study but not both",
 )
 @click.option(
     "--filepath",
     type=click.Path(exists=False, file_okay=True, dir_okay=False),
     help="If provided, download the file to this filepath. This takes "
-    "precedence over --output-dir"
+    "precedence over --output-dir",
 )
 def download_global_descriptors(
     filepath, study_id, study_global_id, job_id, download_all, output_dir
