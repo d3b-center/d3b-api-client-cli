@@ -12,13 +12,15 @@ from d3b_api_client_cli.cli import *
 from d3b_api_client_cli.dewrangle.graphql import organization
 from tests.conftest import ORG_NAME
 
+TEST_ORG_NAME = ORG_NAME + " for orgs"
+
 
 def test_upsert_organization(tmp_path, organization_file):
     """
     Test `d3b-clients dewrangle upsert-organization` command
     """
     # Create
-    fp = organization_file(org_name=ORG_NAME + " 2")
+    fp = organization_file(org_name=TEST_ORG_NAME)
     organization = read_json(fp)
     runner = CliRunner()
     result = runner.invoke(upsert_organization, [fp], standalone_mode=False)
@@ -72,7 +74,7 @@ def test_delete_organization_safety_check_on():
     runner = CliRunner()
     result = runner.invoke(
         delete_organization,
-        ["--dewrangle-org-name", "TestOrg"],
+        ["--dewrangle-org-name", TEST_ORG_NAME],
         standalone_mode=False,
     )
     assert result.exit_code == 1
@@ -82,7 +84,7 @@ def test_delete_organization_safety_check_on():
     found_org = None
     if orgs:
         for org in orgs:
-            if org["name"] == "TestOrg":
+            if org["name"] == TEST_ORG_NAME:
                 found_org = org
                 break
         assert found_org
@@ -99,7 +101,7 @@ def test_delete_organization_safety_check_off():
 
     dwid = None
     for org in orgs:
-        if org["name"] == "TestOrg":
+        if org["name"] == TEST_ORG_NAME:
             dwid = org["id"]
             break
 
@@ -118,4 +120,4 @@ def test_delete_organization_safety_check_off():
 
     orgs = organization.read_organizations()
     if orgs:
-        assert all([org["name"] != "TestOrg" for org in orgs])
+        assert all([org["name"] != TEST_ORG_NAME for org in orgs])
