@@ -185,8 +185,10 @@ def download_global_descriptors(
             "the study's GraphQL ID in Dewrangle"
         )
 
-    return download_global_descriptors(
-        study_id,
+
+    return _download_global_descriptors(
+        dewrangle_study_id=study_id,
+        study_global_id=study_global_id,
         filepath=filepath,
         job_id=job_id,
         descriptors=descriptors,

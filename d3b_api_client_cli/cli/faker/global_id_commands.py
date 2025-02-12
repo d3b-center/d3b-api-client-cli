@@ -31,7 +31,6 @@ DEFAULT_FHIR_RESOURCE_TYPE: FhirResourceType = FHIR_RESOURCE_TYPES["DocumentRefe
 )
 @click.option(
     "--with-global-ids",
-    default=True,
     is_flag=True,
     help="Whether or not to generate a globalId column"
 )
