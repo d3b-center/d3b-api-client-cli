@@ -65,10 +65,7 @@ def upsert_and_download_global_descriptor(
         output_dir = os.path.join(ROOT_DATA_DIR)
         os.makedirs(output_dir, exist_ok=True)
 
-    if study_global_id:
-        s_id = study_global_id
-    else:
-        s_id = dewrangle_study_id
+    s_id = study_global_id if (study_global_id) else dewrangle_study_id
 
     filepath = os.path.join(output_dir, f"global-descriptors-{s_id}.csv")
 
