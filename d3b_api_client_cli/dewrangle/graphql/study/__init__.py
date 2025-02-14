@@ -5,6 +5,7 @@ GraphQL methods to CRUD study in Dewrangle
 import os
 import logging
 from pprint import pformat
+from typing import Optional
 
 import gql
 
@@ -29,6 +30,44 @@ logger = logging.getLogger(__name__)
 
 DEWRANGLE_DIR = config["dewrangle"]["output_dir"]
 DEWRANGLE_MAX_PAGE_SIZE = config["dewrangle"]["pagination"]["max_page_size"]
+
+
+def upsert_global_descriptors(
+    study_file_id: str, skip_unavailable_descriptors: Optional[bool] = True
+) -> dict:
+    """
+    Trigger the operation to upsert global descriptors in Dewrangle
+
+    Args:
+    - skip_unavailable_descriptors: If true any errors due to a descriptor
+    """
+    logger.info(
+        "🛸 Upsert global descriptors for study file: %s", study_file_id
+    )
+    variables = {
+        "input": {
+            "studyFileId": study_file_id,
+            "skipUnavailableDescriptors": skip_unavailable_descriptors,
+        }
+    }
+    resp = exec_query(mutations.upsert_global_descriptors, variables=variables)
+
+    key = "globalDescriptorUpsert"
+    mutation_errors = resp.get(key, {}).get("errors")
+    job_errors = (
+        resp.get(key, {}).get("job", {}).get("errors", {}).get("edges", [])
+    )
+
+    if mutation_errors or job_errors:
+        logger.error("❌ %s for study failed", key)
+        if mutation_errors:
+            logger.error("❌ Mutation Errors:\n%s", pformat(mutation_errors))
+        if job_errors:
+            logger.error("❌ Job Errors:\n%s", pformat(job_errors))
+    else:
+        logger.info("✅ %s for study succeeded:\n%s", key, pformat(resp))
+
+    return resp
 
 
 def upsert_study(

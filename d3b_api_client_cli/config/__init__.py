@@ -3,12 +3,14 @@ All configuration values for the CLI
 """
 
 import os
+from dataclasses import dataclass
 
 from dotenv import find_dotenv, load_dotenv
 
 # File paths and directories
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname((__file__))))
 ROOT_DATA_DIR = os.path.join(ROOT_DIR, "data")
+ROOT_FAKE_DATA_DIR = os.path.join(ROOT_DATA_DIR, "fake_data")
 LOG_DIR = os.path.join(ROOT_DATA_DIR, "logs")
 
 DOTENV_PATH = find_dotenv()
@@ -25,6 +27,23 @@ DB_PORT = os.environ.get("DB_PORT")
 DB_NAME = os.environ.get("DB_NAME")
 DB_USER = os.environ.get("DB_USER")
 DB_USER_PW = os.environ.get("DB_USER_PW")
+
+
+@dataclass
+class FhirResourceType:
+    """
+    Wrapper class to define a FHIR resource type along with a global ID
+    prefix
+    """
+
+    resource_type: str
+    id_prefix: str
+
+
+FHIR_RESOURCE_TYPES: dict = {
+    resource_type: FhirResourceType(resource_type, prefix)
+    for resource_type, prefix in [("DocumentReference", "dr")]
+}
 
 
 class SECRETS:
@@ -61,7 +80,8 @@ config = {
         "endpoints": {
             "graphql": "/api/graphql",
             "rest": {
-                "hash_report": "/api/rest/jobs/{job_id}/report/volume-hash",
+                "study_file": "api/rest/studies/{dewrangle_study_id}/files/{filename}",
+                "global_id": "api/rest/studies/{dewrangle_study_id}/global-descriptors",
                 "job_errors": "/api/rest/jobs/{job_id}/errors",
             },
         },
@@ -69,6 +89,7 @@ config = {
         "credential_type": "AWS",
         "billing_group_id": os.environ.get("CAVATICA_BILLING_GROUP_ID"),
     },
+    "faker": {"global_id": {"fhir_resource_types": FHIR_RESOURCE_TYPES}},
     "aws": {
         "region": os.environ.get("AWS_DEFAULT_REGION") or "us-east-1",
         "s3": {

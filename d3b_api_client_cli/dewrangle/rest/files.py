@@ -3,14 +3,17 @@ Dewrangle functions to download files from the REST API
 """
 
 from typing import Optional
+from pprint import pformat, pprint
 import logging
 import os
 import cgi
+
 
 from d3b_api_client_cli.config import (
     DEWRANGLE_DEV_PAT,
     config,
     check_dewrangle_http_config,
+    ROOT_DATA_DIR,
 )
 from d3b_api_client_cli.utils import send_request, timestamp
 
@@ -30,13 +33,37 @@ def _filename_from_headers(headers: dict) -> str:
     return params.get("filename")
 
 
+def upload_file(url: str, filepath: str, params: Optional[dict] = None):
+    """
+    Upload a file to Dewrangle
+    """
+    logger.info("🛸 Starting upload of %s to %s", filepath, url)
+    with open(filepath, "rb") as file_to_upload:
+        headers = {"x-api-key": DEWRANGLE_DEV_PAT}
+        resp = send_request(
+            "post",
+            url,
+            headers=headers,
+            data=file_to_upload,
+            params=params,
+            # Set timeout to infinity so that uploads don't timeout
+            timeout=-1,
+        )
+
+    logger.info("✅ Completed upload: %s", os.path.split(filepath)[-1])
+    logger.info(pformat(resp.json()))
+
+    return resp.json()
+
+
 def download_file(
     url: str,
     output_dir: Optional[str] = None,
     filepath: Optional[str] = None,
+    params: Optional[dict] = None,
 ) -> str:
     """
-    Download study's global IDs from Dewrangle
+    Download a file from Dewrangle
 
     If filepath is provided, download content to that filepath
 
@@ -47,12 +74,17 @@ def download_file(
         filepath - if the downloaded file was not empty
         None - if the downloaded file was empty
     """
-    logger.info("🛸 Start downloading file from Dewrangle ...")
+    logger.info("🛸 Start downloading file from Dewrangle %s ...", url)
+
+    if (not filepath) and (not output_dir):
+        output_dir = os.path.join(ROOT_DATA_DIR)
+        os.makedirs(output_dir, exist_ok=True)
 
     headers = {"x-api-key": DEWRANGLE_DEV_PAT, "content-type": CSV_CONTENT_TYPE}
     resp = send_request(
         "get",
         url,
+        params=params,
         headers=headers,
     )
     if not filepath:
@@ -70,6 +102,22 @@ def download_file(
     return filepath
 
 
+def upload_study_file(dewrangle_study_id: str, filepath: str):
+    """
+    Upload a CSV file to Dewrangle's study file endpoint
+    """
+    filepath = os.path.abspath(filepath)
+    base_url = config["dewrangle"]["base_url"]
+    endpoint_template = config["dewrangle"]["endpoints"]["rest"]["study_file"]
+    endpoint = endpoint_template.format(
+        dewrangle_study_id=dewrangle_study_id,
+        filename=os.path.split(filepath)[-1],
+    )
+    url = f"{base_url}/{endpoint}"
+
+    return upload_file(url, filepath)
+
+
 def download_job_errors(
     job_id: str,
     output_dir: Optional[str] = None,
@@ -84,26 +132,6 @@ def download_job_errors(
     check_dewrangle_http_config()
 
     endpoint_template = config["dewrangle"]["endpoints"]["rest"]["job_errors"]
-    endpoint = endpoint_template.format(job_id=job_id)
-    url = f"{DEWRANGLE_BASE_URL}{endpoint}"
-
-    return download_file(url, filepath=filepath, output_dir=output_dir)
-
-
-def download_hash_report(
-    job_id: str,
-    output_dir: Optional[str] = None,
-    filepath: Optional[str] = None,
-) -> str:
-    """
-    Download a volume hash report from Dewrangle
-
-    See download_file for details
-    """
-    # Ensure env vars are set
-    check_dewrangle_http_config()
-
-    endpoint_template = config["dewrangle"]["endpoints"]["rest"]["hash_report"]
     endpoint = endpoint_template.format(job_id=job_id)
     url = f"{DEWRANGLE_BASE_URL}{endpoint}"
 
