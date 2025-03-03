@@ -1,6 +1,7 @@
 """
 Unit tests for interacting with postgres
 """
+
 import pytest
 
 from d3b_api_client_cli.db.postgres import DBConnectionParam
@@ -21,7 +22,7 @@ def test_db_connection_params():
         password=password,
         hostname=hostname,
         port=port,
-        db_name=db_name
+        db_name=db_name,
     )
 
     assert params.username == username
@@ -47,5 +48,5 @@ def test_db_connection_params_error():
             password=password,
             hostname=hostname,
             port=port,
-            db_name=db_name
+            db_name=db_name,
         )

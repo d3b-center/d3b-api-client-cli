@@ -25,9 +25,7 @@ class DBConnectionParam:
 
     def __post_init__(self):
         if any(
-            not value
-            for value in vars(self).values()
-            if not callable(value)
+            not value for value in vars(self).values() if not callable(value)
         ):
             display = {}
             for k, v in vars(self).items():
