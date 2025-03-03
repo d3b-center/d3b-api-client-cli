@@ -25,7 +25,7 @@ class DBConnectionParam:
 
     def __post_init__(self):
         if any(
-            value is None
+            not value
             for value in vars(self).values()
             if not callable(value)
         ):
