@@ -83,16 +83,6 @@ upsert_global_descriptors = gql(
         job {
           id
           completedAt
-          globalDescriptors {
-            totalCount
-            edges {
-              node {
-                descriptor
-                globalId
-                fhirResourceType
-              }
-            }
-          }
           errors {
             totalCount
             edges {
