@@ -27,6 +27,23 @@ organization_users = gql(
                 description
                 email
                 website
+                fhirServers {
+                  edges {
+                    node {
+                      id
+                      name
+                      url
+                      type
+                      authType
+                      authConfig {
+                        ... on FhirServerAuthConfigOIDCClientCredential {
+                          issuerBaseUrl
+                          clientId
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }

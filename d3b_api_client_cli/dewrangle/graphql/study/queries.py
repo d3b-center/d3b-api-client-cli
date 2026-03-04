@@ -4,6 +4,7 @@ Dewrangle GraphQL query definitions
 
 from gql import gql
 
+
 study = gql(
     """
     query studyQuery($id: ID!) {
@@ -17,25 +18,18 @@ study = gql(
             name
             id
           }
-        }
-      }
-    }
-    """
-)
-
-study_by_global_id = gql(
-    """
-    query studyQuery($id: ID!, $filter: StudyFilter!) {
-      node(id: $id) {
-        id
-        ... on Organization {
-          name
-          studies(filter: $filter) {
-            edges {
-              node {
-                id
-                name
-                globalId
+          fhirServerDeployments {
+            id
+            fhirServer {
+              id
+              name
+              url
+              authType
+              authConfig {
+                ...on FhirServerAuthConfigOIDCClientCredential {
+                  issuerBaseUrl
+                  clientId
+                }
               }
             }
           }
@@ -65,24 +59,17 @@ org_studies = gql(
                 id
                 globalId
                 name
-                studyFhirServers {
-                  edges {
-                    node {
-                      id
-                      ... on StudyFhirServer {
-                        fhirServer {
-                          id
-                          name
-                          url
-                          type
-                          authType
-                          authConfig {
-                            ... on FhirServerAuthConfigOIDCClientCredential {
-                              issuerBaseUrl
-                              clientId
-                            }
-                          }
-                        }
+                fhirServerDeployments {
+                  id
+                  fhirServer {
+                    id
+                    name
+                    url
+                    authType
+                    authConfig {
+                      ...on FhirServerAuthConfigOIDCClientCredential {
+                        issuerBaseUrl
+                        clientId
                       }
                     }
                   }
