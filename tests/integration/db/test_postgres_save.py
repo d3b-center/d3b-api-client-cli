@@ -4,9 +4,10 @@ Tests for postgres save actions
 
 import os
 import pytest
-
+from sqlalchemy import create_engine
 import pandas as pd
 from psycopg2 import connect, sql
+from urllib.parse import quote_plus
 
 from d3b_api_client_cli.db.postgres.save import save_df_to_db
 from d3b_api_client_cli.db.postgres.admin import create_db_schema
@@ -55,6 +56,9 @@ def test_df_to_db(postgres_db, test_dataframe):
         host=db_host,
         port=db_port,
     )
+    engine = create_engine(
+        f"postgresql+psycopg2://{db_user}:{quote_plus(db_password)}@{db_host}:{db_port}/{db_name}"
+    )
 
     create_db_schema(conn, TEST_SCHEMA)
 
@@ -69,5 +73,5 @@ def test_df_to_db(postgres_db, test_dataframe):
     query = sql.SQL(
         "SELECT * FROM {0}.test_table;",
     ).format(sql.Identifier(TEST_SCHEMA))
-    df_db = pd.read_sql_query(query.as_string(conn), conn)
+    df_db = pd.read_sql_query(query.as_string(conn), engine)
     assert df_db.shape[0] == 3
