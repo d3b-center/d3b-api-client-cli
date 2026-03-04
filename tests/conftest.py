@@ -1,195 +1,149 @@
-"""
-Reusable fixtures and helpers for all tests
-"""
-
 import os
+import shutil
 import pytest
+import json
 from click.testing import CliRunner
 from testcontainers.postgres import PostgresContainer
 
-from d3b_api_client_cli.utils import write_json
-
-from d3b_api_client_cli.cli import *
-from d3b_api_client_cli.dewrangle.graphql import (
-    organization,
-    study,
-    credential,
+from d3b_api_client_cli.utils import read_json, send_request
+from d3b_api_client_cli.config import (
+    ROOT_DIR,
+    KF_FHIR_QA_OIDC_CLIENT_SECRET,
+    config,
 )
-from d3b_api_client_cli.config import config
+from d3b_api_client_cli.cli.fhir.commands import delete_all, load_fhir
+from d3b_api_client_cli.cli.dewrangle.graphql_commands import (
+    upsert_organization,
+    upsert_study,
+    upsert_fhir_server,
+)
+from d3b_api_client_cli.dewrangle.graphql import organization
 
-AWS_ACCESS_KEY_ID = config["aws"]["s3"]["aws_access_key_id"]
-AWS_SECRET_ACCESS_KEY = config["aws"]["s3"]["aws_secret_access_key"]
-AWS_BUCKET_DATA_TRANSFER_TEST = config["aws"]["s3"]["test_bucket_name"]
 
 POSTGRES_DB_IMAGE = "postgres:16-alpine"
-ORG_NAME = "Integration Tests d3b-api-client-cli"
+
+
+def get_study_id():
+    """
+    Gets a single study from Dataservice
+
+    Used in various tests
+    """
+    base_url = config["dataservice"]["api_url"]
+    url = f"{base_url}/studies?limit=1"
+    resp = send_request("get", url)
+
+    return resp.json()["results"][0]["kf_id"]
+
+
+@pytest.fixture
+def fhir_json_data(tmp_path, dewrangle_study):
+    """
+    Provide a temp FHIR directory + Dewrangle study node id for ingest tests.
+
+    Returns:
+      (dewrangle_study_node_id, fhir_dir, entities_to_load)
+    """
+    src_dir = os.path.join(ROOT_DIR, "tests", "data", "fhir_minimal")
+    dest_dir = tmp_path / "fhir_minimal"
+    shutil.copytree(src_dir, dest_dir)
+
+    study_json_path = dest_dir / "Study.json"
+    with open(study_json_path, "w") as f:
+        json.dump({"kf_id": dewrangle_study["globalId"]}, f)
+
+    entities_to_load = ["patient", "observation", "encounter"]
+
+    return (dewrangle_study["id"], str(dest_dir), entities_to_load)
 
 
 @pytest.fixture(scope="session")
-def organization_file(tmp_path_factory):
+def delete_fhir_data():
     """
-    Write the inputs to create a Dewrangle Organization to file
+    Delete all data in FHIR server
     """
-
-    def create_and_write_org(org_name=ORG_NAME):
-        data_dir = tmp_path_factory.mktemp("data")
-        org_filepath = os.path.join(data_dir, "Organization.json")
-        org = {
-            "name": org_name,
-            "description": "A test org",
-            "visibility": "PRIVATE",
-        }
-        write_json(org, org_filepath)
-
-        return org_filepath
-
-    return create_and_write_org
+    runner = CliRunner()
+    result = runner.invoke(delete_all, [])
+    assert result.exit_code == 0
 
 
 @pytest.fixture(scope="session")
-def study_file(tmp_path_factory):
+def load_fhirservice(delete_fhir_data, fhir_json_data):
     """
-    Write the inputs to create a Dewrangle Organization to file
+    Load all test data in FHIR server
     """
+    study_id, fhir_json_dir = fhir_json_data
 
-    def create_and_write_study(study_name="TestStudy", global_id=None):
-        data_dir = tmp_path_factory.mktemp("data")
-        study_filepath = os.path.join(data_dir, "Study.json")
-        study = {
-            "name": study_name,
-            "description": "A test study",
-        }
-        if global_id:
-            study["global_id"] = global_id
-        write_json(study, study_filepath)
+    runner = CliRunner()
+    result = runner.invoke(load_fhir, [fhir_json_dir])
+    assert result.exit_code == 0
 
-        return study_filepath
+    resources = {}
+    for fn in os.listdir(fhir_json_dir):
+        fp = os.path.join(fhir_json_dir, fn)
+        resources[os.path.splitext(fn)[0]] = read_json(fp)
 
-    return create_and_write_study
+    return study_id, resources
 
 
 @pytest.fixture(scope="session")
-def dewrangle_org(organization_file):
+def dewrangle_org():
     """
     Upsert an Organization in Dewrangle for other tests to use
     """
-    fp = organization_file()
+    fp = os.path.join(ROOT_DIR, "tests/data/test-org.json")
     runner = CliRunner()
     result = runner.invoke(upsert_organization, [fp], standalone_mode=False)
     assert result.exit_code == 0
 
-    yield result.return_value, fp
+    yield result.return_value
 
-    organization.delete_organization(
-        result.return_value["id"], delete_safety_check=False
-    )
+    organization.delete_organization(dewrangle_org_id=result.return_value["id"])
 
 
 @pytest.fixture(scope="session")
-def dewrangle_study(dewrangle_org, study_file):
+def dewrangle_study(dewrangle_org):
     """
-    Upsert a Dewrangle study into the integration tests org
+    Upsert a Study in Dewrangle for other tests to use
     """
-    org, fp = dewrangle_org
-    fp = study_file()
-
+    fp = os.path.join(ROOT_DIR, "tests/data/test-study.json")
     runner = CliRunner()
-    result = runner.invoke(upsert_study, [fp, org["id"]], standalone_mode=False)
-    return result.return_value, fp
-
-
-@pytest.fixture(scope="function")
-def delete_credentials(tmp_path):
-    """
-    Delete all credentials
-    """
-    temp_dir = tmp_path / "output"
-    temp_dir.mkdir()
-    credentials = credential.read_credentials(temp_dir)
-
-    for node in credentials.values():
-        runner = CliRunner()
-        result = runner.invoke(
-            delete_credential,
-            ["--node-id", node["id"], "--disable-delete-safety-check"],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-        assert result.return_value
-
-
-@pytest.fixture(scope="session")
-def dewrangle_credential(dewrangle_study):
-    """
-    Create credential for dewrangle study
-    """
-    study, _ = dewrangle_study
-    runner = CliRunner()
-
     result = runner.invoke(
-        upsert_credential,
+        upsert_study, [fp, dewrangle_org["id"]], standalone_mode=False
+    )
+    assert result.exit_code == 0
+
+    study = result.return_value
+    study["organization_name"] = dewrangle_org["name"]
+
+    return study
+
+
+@pytest.fixture(scope="session")
+def dewrangle_fhir_server(dewrangle_org):
+    """
+    Upsert a FHIR server in Dewrangle for other tests to use
+    """
+    fp = os.path.join(ROOT_DIR, "tests/data/kidsfirst-qa-upgrade-server.json")
+    server = read_json(fp)
+
+    runner = CliRunner()
+    result = runner.invoke(
+        upsert_fhir_server,
         [
-            "--name",
-            "e2e",
-            "--key",
-            AWS_ACCESS_KEY_ID,
-            "--secret",
-            AWS_SECRET_ACCESS_KEY,
-            "--study-id",
-            study["id"],
+            fp,
+            dewrangle_org["id"],
+            "--oidc-client-secret",
+            KF_FHIR_QA_OIDC_CLIENT_SECRET,
         ],
         standalone_mode=False,
     )
     assert result.exit_code == 0
-    credential = result.return_value
-    credential["study_global_id"] = study["globalId"]
-    credential["study_id"] = study["id"]
+    server["id"] = result.return_value["id"]
 
-    return credential
+    return server
 
 
-@pytest.fixture(scope="session")
-def make_dewrangle_volume(dewrangle_credential):
-    """
-    Return a function taht creates a dewrangle volume
-    """
-
-    def _make_volume(jira_ticket_number):
-        """
-        Create a dewrangle volume
-        """
-        study_id = dewrangle_credential["study_id"]
-        runner = CliRunner()
-        bucket = AWS_BUCKET_DATA_TRANSFER_TEST
-        path_prefix = jira_ticket_number
-
-        # Create
-        result = runner.invoke(
-            upsert_volume,
-            [
-                "--bucket",
-                bucket,
-                "--path-prefix",
-                path_prefix,
-                "--study-id",
-                study_id,
-                "--credential-key",
-                dewrangle_credential["key"],
-            ],
-            standalone_mode=False,
-        )
-        assert result.exit_code == 0
-
-        volume = result.return_value
-        volume["study_id"] = study_id
-        volume["study_global_id"] = dewrangle_credential["study_global_id"]
-
-        return volume
-
-    return _make_volume
-
-
-# Postgres DB Fixtures
 @pytest.fixture(scope="module")
 def postgres_db(request):
     """
