@@ -182,7 +182,8 @@ cython_debug/
 *.python-version
 
 data/
-!d3b-api-clients/tests/data
+!tests/data/
+!tests/data/**
 pyvenv.cfg
 
 .DS_Store
