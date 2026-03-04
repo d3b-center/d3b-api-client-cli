@@ -6,6 +6,7 @@ import os
 import logging
 from pprint import pformat
 
+from d3b_api_client_cli.config import DEWRANGLE_MAX_PAGE_SIZE
 from d3b_api_client_cli.dewrangle.graphql.common import (
     exec_query,
 )
@@ -13,34 +14,34 @@ from d3b_api_client_cli.dewrangle.graphql.organization import (
     queries,
     mutations,
 )
-from d3b_api_client_cli.config import config
+from d3b_api_client_cli.config import DEWRANGLE_DIR
 from d3b_api_client_cli.utils import write_json
 
-DEWRANGLE_MAX_PAGE_SIZE = config["dewrangle"]["pagination"]["max_page_size"]
-DEWRANGLE_DIR = config["dewrangle"]["output_dir"]
 logger = logging.getLogger(__name__)
 
 
-def upsert_organization(variables: dict) -> dict:
+def upsert_organization(variables):
     """
     Upsert organization in Dewrangle
 
-    Args:
-        variables: Organization attributes (see Dewrangle graphql schema)
+    :param variables: Organization attributes (see Dewrangle graphql schema)
+    :type variables: dict
+    :rtype: dict
+    :returns: the organization
     """
     params = {"input": variables}
-
     # Check if this is an update or create
     orgs = read_organizations(log_output=False)
-    found_org = None
+    update = False
     for org in orgs:
         if org["name"] == variables["name"]:
-            found_org = org
+            update = True
             break
 
-    if found_org:
+    if update:
         key = "Update"
-        params.update({"id": found_org["id"]})
+        params.update({"id": org["id"]})
+        dwid = org["id"]
         resp = exec_query(mutations.update_organization, variables=params)
     else:
         key = "Create"
@@ -48,33 +49,28 @@ def upsert_organization(variables: dict) -> dict:
 
     errors = resp.get(f"organization{key}", {}).get("errors")
     if errors:
-        logger.error("❌ %s organization failed:\n%s", key, pformat(resp))
+        logger.warning(f"‼️  {key} organization failed:\n{pformat(resp)}")
     else:
-        logger.info("✅ %s organization succeeded:\n%s", key, pformat(resp))
+        logger.warning(f"✅ {key} organization succeeded:\n{pformat(resp)}")
 
     result = resp[f"organization{key}"]["organization"]
 
     return result
 
 
-def delete_organization(
-    dewrangle_org_id: str = None,
-    dewrangle_org_name: str = None,
-    delete_safety_check: bool = True,
-) -> dict:
+def delete_organization(dewrangle_org_id=None, dewrangle_org_name=None):
     """
-    Delete organization in Dewrangle by graphql node ID or name
+    Delete organization in Dewrangle by node ID or name
 
-    Args:
-        dewrangle_org_id: Dewrangle node ID of the organization
-        dewrangle_org_name: Dewrangle name of organization
-        delete_safety_check: only delete if this is False
-
-    Returns:
-        the response from Dewrangle
+    :param dewrangle_org_id: Dewrangle node ID of the organization
+    :type dewrangle_org_id: str
+    :param dewrangle_org_name: Dewrangle name of organization
+    :type dewrangle_org_name: str
+    :rtype: dict
+    :returns: the response
     """
     if not (dewrangle_org_id or dewrangle_org_name):
-        raise ValueError(
+        raise Exception(
             "You must provide either the dewrangle_org_id or dewrangle_org_name"
         )
 
@@ -85,55 +81,48 @@ def delete_organization(
     else:
         node_id = dewrangle_org_id
 
-    resp = exec_query(
-        mutations.delete_organization,
-        variables={"id": node_id},
-        delete_safety_check=delete_safety_check,
-    )
+    resp = exec_query(mutations.delete_organization, variables={"id": node_id})
 
-    key = "Delete"
     errors = resp.get("organizationDelete", {}).get("errors")
     if errors:
-        logger.error("❌ %s organization failed:\n%s", key, pformat(resp))
+        result = errors
+        logger.warning(f"🚮 ‼️  Delete organization failed:\n{pformat(resp)}")
     else:
-        logger.info("✅ %s organization succeeded:\n%s", key, pformat(resp))
+        logger.info(f"🚮 Deleted organization:\n{pformat(resp)}")
         result = resp["organizationDelete"]["organization"]
         result["id"] = node_id
 
     return result
 
 
-def read_organizations(
-    output_dir: str = DEWRANGLE_DIR, log_output: bool = True
-) -> list[dict]:
+def read_organizations(output_dir=DEWRANGLE_DIR, log_output=True):
     """
     Fetch organizations that the client has access to
+
+    :rtype: dict
+    :returns: the organizations
     """
     organizations = paginate_organizations()
-    logger.info("Fetched %s organizations", len(organizations))
+    logger.info(f"Fetched {len(organizations)} organizations")
 
     if output_dir:
         os.makedirs(output_dir, exist_ok=True)
         filepath = os.path.join(output_dir, "Organization.json")
         write_json(organizations, filepath)
-        logger.info(
-            "✏️  Wrote %s organization to %s", len(organizations), filepath
-        )
+        logger.info(f"✏️  Wrote {len(organizations)} organization to {filepath}")
 
     if log_output:
-        logger.info("👨‍👩‍👦 Organizations:\n%s", pformat(organizations))
+        logger.info(f"👨‍👩‍👦 Organizations:\n{pformat(organizations)}")
 
     return organizations
 
 
-def read_organization(
-    dewrangle_org_id: str = None, dewrangle_org_name: str = None
-) -> dict:
+def read_organization(dewrangle_org_name=None, dewrangle_org_id=None):
     """
     Fetch Dewrangle organization by name
     """
     if not (dewrangle_org_id or dewrangle_org_name):
-        raise ValueError(
+        raise Exception(
             "You must provide either the dewrangle_org_id or dewrangle_org_name"
         )
     key = "id" if dewrangle_org_id else "name"
@@ -149,9 +138,7 @@ def read_organization(
     return found_org
 
 
-def paginate_organizations(
-    org_page_size: int = DEWRANGLE_MAX_PAGE_SIZE,
-) -> list[dict]:
+def paginate_organizations(org_page_size=DEWRANGLE_MAX_PAGE_SIZE):
     """
     Fetch all organizations that the viewer has access to
 
@@ -175,7 +162,7 @@ def paginate_organizations(
             has_next_page = False
             continue
 
-        logger.info("Collecting %s organizations", f"{count}/{total}")
+        logger.info(f"Collecting {count}/{total} organizations")
         for org_user in org_users:
             organizations.append(org_user["node"]["organization"])
 
@@ -191,7 +178,7 @@ def paginate_organizations(
     return organizations
 
 
-def get_org_by_name(org_name: str) -> dict:
+def get_org_by_name(org_name):
     """
     Fetch organization from Dewrangle
     """

@@ -1,54 +1,45 @@
-"""
-Test Dewrangle organization cmds
-"""
-
 import os
 
 import pytest
 from click.testing import CliRunner
 
 from d3b_api_client_cli.utils import read_json, write_json
+from d3b_api_client_cli.config import config, ROOT_DIR, IdTypes
 from d3b_api_client_cli.cli import *
 from d3b_api_client_cli.dewrangle.graphql import organization
-from tests.conftest import ORG_NAME
-
-TEST_ORG_NAME = ORG_NAME + " for orgs"
 
 
-def test_upsert_organization(tmp_path, organization_file):
+@pytest.fixture(scope="session")
+def organization_file(tmp_path_factory):
     """
-    Test `d3b-clients dewrangle upsert-organization` command
+    Write the inputs to create a Dewrangle Organization to file
     """
-    # Create
-    fp = organization_file(org_name=TEST_ORG_NAME)
-    organization = read_json(fp)
+    data_dir = tmp_path_factory.mktemp("data")
+    org_filepath = os.path.join(data_dir, "Organization.json")
+    org = {
+        "name": "TestOrg",
+        "description": "A test org",
+        "visibility": "PRIVATE",
+    }
+    write_json(org, org_filepath)
+
+    return org_filepath
+
+
+def test_upsert_organization(organization_file):
+    """
+    Test `dwds dewrangle upsert-organization` command
+    """
+    fp = organization_file
     runner = CliRunner()
     result = runner.invoke(upsert_organization, [fp], standalone_mode=False)
     assert result.exit_code == 0
     assert result.return_value["id"]
 
-    # Update
-    organization["name"] = "foobar"
-    write_json(organization, fp)
-    result = runner.invoke(upsert_organization, [fp], standalone_mode=False)
-    assert result.exit_code == 0
-    assert result.return_value["name"] == "foobar"
-
-    # Delete it
-    result = runner.invoke(
-        delete_organization,
-        [
-            "--dewrangle-org-id",
-            result.return_value["id"],
-            "--disable-delete-safety-check",
-        ],
-        standalone_mode=False,
-    )
-
 
 def test_read_organization(tmp_path):
     """
-    Test `d3b-clients dewrangle read-organizations` command
+    Test `dwds dewrangle read-organizations` command
     """
     temp_dir = tmp_path / "output"
     temp_dir.mkdir()
@@ -62,38 +53,9 @@ def test_read_organization(tmp_path):
     assert os.path.exists(os.path.join(temp_dir, "Organization.json"))
 
 
-def test_delete_organization_safety_check_on():
+def test_delete_organization():
     """
-    Test `d3b-clients dewrangle delete-organization` command
-    with safety check enabled for delete
-    """
-    orgs = organization.read_organizations()
-    if not orgs:
-        return
-
-    runner = CliRunner()
-    result = runner.invoke(
-        delete_organization,
-        ["--dewrangle-org-name", TEST_ORG_NAME],
-        standalone_mode=False,
-    )
-    assert result.exit_code == 1
-    assert "DELETE_SAFETY_CHECK" in str(result.exc_info)
-
-    orgs = organization.read_organizations()
-    found_org = None
-    if orgs:
-        for org in orgs:
-            if org["name"] == TEST_ORG_NAME:
-                found_org = org
-                break
-        assert found_org
-
-
-def test_delete_organization_safety_check_off():
-    """
-    Test `d3b-clients dewrangle delete-organization` command
-    with safety check disabled for delete
+    Test `dwds dewrangle delete-organization` command
     """
     orgs = organization.read_organizations()
     if not orgs:
@@ -101,7 +63,7 @@ def test_delete_organization_safety_check_off():
 
     dwid = None
     for org in orgs:
-        if org["name"] == TEST_ORG_NAME:
+        if org["name"] == "TestOrg":
             dwid = org["id"]
             break
 
@@ -111,13 +73,11 @@ def test_delete_organization_safety_check_off():
 
     runner = CliRunner()
     result = runner.invoke(
-        delete_organization,
-        ["--dewrangle-org-id", dwid, "--disable-delete-safety-check"],
-        standalone_mode=False,
+        delete_organization, ["--dewrangle-org-id", dwid], standalone_mode=False
     )
     assert result.exit_code == 0
     assert result.return_value["id"]
 
     orgs = organization.read_organizations()
     if orgs:
-        assert all([org["name"] != TEST_ORG_NAME for org in orgs])
+        assert all([org["name"] != "TestOrg" for org in orgs])

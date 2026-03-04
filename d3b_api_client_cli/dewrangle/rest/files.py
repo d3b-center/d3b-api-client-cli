@@ -6,7 +6,8 @@ from typing import Optional
 from pprint import pformat, pprint
 import logging
 import os
-import cgi
+from email.message import Message
+from urllib.parse import unquote
 
 
 from d3b_api_client_cli.config import (
@@ -24,13 +25,38 @@ DEWRANGLE_BASE_URL = config["dewrangle"]["base_url"].rstrip("/")
 DEFAULT_FILENAME = f"dewrangle-file-{timestamp()}.csv"
 
 
-def _filename_from_headers(headers: dict) -> str:
+def _filename_from_headers(headers: dict) -> str | None:
     """
-    Helper to get the filename from the Content-Disposition
-    header of an HTTP response
+    Helper to get the filename from the Content-Disposition header.
+
+    Supports both:
+      - filename="foo.csv"
+      - filename*=UTF-8''foo%20bar.csv  (RFC 5987)
     """
-    _, params = cgi.parse_header(headers["Content-Disposition"])
-    return params.get("filename")
+    cd = headers.get("Content-Disposition")
+    if not cd:
+        return None
+
+    msg = Message()
+    msg["content-disposition"] = cd
+
+    # email.Message.get_param handles quoted values
+    filename = msg.get_param("filename", header="content-disposition")
+    if filename:
+        return filename
+
+    # RFC 5987: filename*=charset''urlencoded
+    filename_star = msg.get_param("filename*", header="content-disposition")
+    if not filename_star:
+        return None
+
+    # Example: UTF-8''foo%20bar.csv
+    try:
+        _, encoded = filename_star.split("''", 1)
+    except ValueError:
+        encoded = filename_star
+
+    return unquote(encoded)
 
 
 def upload_file(url: str, filepath: str, params: Optional[dict] = None):

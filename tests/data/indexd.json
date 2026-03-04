@@ -1,0 +1,52 @@
+[
+  {
+    "acl": ["drc_test", "SD_11111111"],
+    "authz": ["/programs/drc_test", "/programs/SD_11111111"],
+    "baseid": "dde67421-333c-416b-8b6a-5ed9cf4645f0",
+    "created_date": "2023-10-11T20:01:54.359835",
+    "did": "6903df49-96a9-41da-ae46-395a7dbb1166",
+    "file_name": "genomic-file-0.cram",
+    "form": "object",
+    "hashes": {
+      "md5": "b4a3728a635d2ca72834f7e119235f38",
+      "sha256": "dcb8eb82b12c4c4ddc111ac11193b3fb4106e12c12f1ed2e7aec3eeea74a7869"
+    },
+    "metadata": {},
+    "rev": "eaa7205e",
+    "size": 874,
+    "updated_date": "2023-10-16T14:38:03.574371",
+    "uploader": null,
+    "urls": [
+      "s3://kf-study-us-east-1-prd-sd-me0wme0w/source/genomic-files/genomic-file-0.cram"
+    ],
+    "urls_metadata": {
+      "s3://kf-study-us-east-1-prd-sd-me0wme0w/source/genomic-files/genomic-file-0.cram": {}
+    },
+    "version": null
+  },
+  {
+    "acl": ["drc_test", "SD_11111111"],
+    "authz": ["/programs/drc_test", "/programs/SD_11111111"],
+    "baseid": "dde67421-333c-416b-8b6a-5ed9cf4645f0",
+    "created_date": "2023-10-11T20:01:54.359835",
+    "did": "6903df49-96a9-41da-ae46-395a7dbb1166",
+    "file_name": "genomic-file-0.cram.crai",
+    "form": "object",
+    "hashes": {
+      "md5": "b4a3728a635d2ca72834f7e119235f38",
+      "sha256": "dcb8eb82b12c4c4ddc111ac11193b3fb4106e12c12f1ed2e7aec3eeea74a7869"
+    },
+    "metadata": {},
+    "rev": "eaa7205e",
+    "size": 874,
+    "updated_date": "2023-10-16T14:38:03.574371",
+    "uploader": null,
+    "urls": [
+      "s3://kf-study-us-east-1-prd-sd-me0wme0w/source/genomic-files/genomic-file-0.cram.crai"
+    ],
+    "urls_metadata": {
+      "s3://kf-study-us-east-1-prd-sd-me0wme0w/source/genomic-files/genomic-file-0.cram.crai": {}
+    },
+    "version": null
+  }
+]

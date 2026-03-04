@@ -4,13 +4,44 @@ Dewrangle GraphQL query definitions
 
 from gql import gql
 
-job = gql(
+fhir_resource_ingest_job = gql(
     """
-    query jobQuery($id: ID!) {
+    query fhirResourceIngestJobQuery($id: ID!) {
       node(id: $id) {
         id
         ... on Job {
-          id
+          operation
+          completedAt
+          result {
+            ... on JobResultFhirResource {
+              resources {
+                count
+                resourceType
+              }
+            }
+          }
+          errors {
+            edges {
+              node {
+                id
+                name
+                message
+              }
+            }
+          }
+    
+        }
+      }
+    }
+    """
+)
+
+job_status_query = gql(
+    """
+    query jobStatusQuery($id: ID!) {
+      node(id: $id) {
+        id
+        ... on Job {
           operation
           completedAt
           errors {
@@ -22,6 +53,7 @@ job = gql(
               }
             }
           }
+    
         }
       }
     }

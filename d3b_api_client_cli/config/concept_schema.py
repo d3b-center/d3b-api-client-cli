@@ -1,0 +1,424 @@
+"""
+Classes that define the standard set of columns for an intermediate data model
+used by the transform stage of ETLs.
+
+These columns are namespaced by entity type and create completely unambiguous
+column names. For example all Dataservice tables have the kf_id column to
+denote the primary key. However, when two tables are merged there will be
+a collision on this column.
+
+Thus we map the source columns to these namespaced columns to eliminate
+ambiguity. For example kf_id in the genomic file table becomes
+GENOMIC_FILE.TARGET_SERVICE_ID
+"""
+
+import inspect
+
+DELIMITER = "|"
+UNIQUE_ID_ATTR = "UNIQUE_KEY"
+
+
+def obj_attrs_to_dict(cls):
+    """
+    Create a dict of obj attributes and values, including inherited attrs
+    """
+    # Get non function attributes
+    attributes = inspect.getmembers(cls, lambda x: not (inspect.isroutine(x)))
+
+    # Get non-hidden attrs
+    attributes = [
+        a
+        for a in attributes
+        if not (a[0].startswith("__") and a[0].endswith("__"))
+    ]
+    return dict(attributes)
+
+
+class QuantityMixin:
+    VALUE = None
+    UNITS = None
+
+
+class FileMixin:
+    SIZE = None
+    FILE_NAME = None
+    HASH_DICT = None
+    URL_LIST = None
+    ACL = None
+    AUTHZ = None
+    AVAILABILITY = None
+    CONTROLLED_ACCESS = None
+    FILE_FORMAT = None
+    DATA_TYPE = None
+    DATA_CATEGORY = None
+    ACCESS_URL = None
+    FORMAT = None
+
+
+class PropertyMixin:
+    _CONCEPT_NAME = None
+    UNIQUE_KEY = None
+    ID = None
+    TARGET_SERVICE_ID = None
+    HIDDEN = None  # obverse of VISIBLE
+    VISIBLE = None  # obverse of HIDDEN
+
+
+class CONCEPT:
+    class PROJECT:
+        ID = None
+
+    class INVESTIGATOR(PropertyMixin):
+        NAME = None
+        INSTITUTION = None
+
+    class STUDY(PropertyMixin):
+        AUTHORITY = None
+        DOMAIN = None
+        SHORT_CODE = None
+        PROGRAM = None
+        VERSION = None
+        NAME = None
+        SHORT_NAME = None
+        ATTRIBUTION = None
+        RELEASE_STATUS = None
+        CATEGORY = None
+        BIOBANK_EMAIL = None
+        BIOBANK_NAME = None
+        BIOBANK_REQUEST_LINK = None
+        BIOBANK_REQUEST_INSTRUCTIONS = None
+
+    class STUDY_FILE(PropertyMixin, FileMixin):
+        pass
+
+    class FAMILY(PropertyMixin):
+        pass
+
+    class FAMILY_RELATIONSHIP(PropertyMixin):
+        class PERSON1(PropertyMixin):
+            GENDER = None
+            pass
+
+        class PERSON2(PropertyMixin):
+            GENDER = None
+            pass
+
+        RELATION_FROM_1_TO_2 = None
+
+    class SAMPLE_RELATIONSHIP(PropertyMixin):
+        NOTES = None
+
+        class PARENT(PropertyMixin):
+            pass
+
+        class CHILD(PropertyMixin):
+            pass
+
+    class PARTICIPANT(PropertyMixin):
+        IS_PROBAND = None
+        FATHER_ID = None
+        MOTHER_ID = None
+        PROBAND_ID = None
+        RELATIONSHIP_TO_PROBAND = None
+        GENDER = None
+        SEX = None
+        ETHNICITY = None
+        RACE = None
+        CONSENT_TYPE = None
+        # affected by diagnoses/phenotypes specifically mentioned by the study
+        IS_AFFECTED_UNDER_STUDY = None
+        SPECIES = None
+        ENROLLMENT_AGE_DAYS = None
+        LAST_CONTACT_AGE_DAYS = None
+
+        class ENROLLMENT_AGE(QuantityMixin):
+            pass
+
+        class LAST_CONTACT_AGE(QuantityMixin):
+            pass
+
+    class OUTCOME(PropertyMixin):
+        VITAL_STATUS = None
+        EVENT_AGE_DAYS = None
+
+        class EVENT_AGE(QuantityMixin):
+            pass
+
+        DISEASE_RELATED = None
+
+    class DIAGNOSIS(PropertyMixin):
+        NAME = None
+        TUMOR_LOCATION = None
+        SPATIAL_DESCRIPTOR = None
+        CATEGORY = None
+        UBERON_TUMOR_LOCATION_ID = None
+        EVENT_AGE_DAYS = None
+        VERIFICATION = None
+
+        class ABATEMENT_EVENT_AGE(QuantityMixin):
+            pass
+
+        class EVENT_AGE(QuantityMixin):
+            pass
+
+        MONDO_ID = None
+        NCIT_ID = None
+        ICD_ID = None
+
+    class PHENOTYPE(PropertyMixin):
+        NAME = None
+        HPO_ID = None
+        SNOMED_ID = None
+        OBSERVED = None
+        EVENT_AGE_DAYS = None
+        INTERPRETATION = None
+        VERIFICATION = None
+
+        class ABATEMENT_EVENT_AGE(QuantityMixin):
+            pass
+
+        class EVENT_AGE(QuantityMixin):
+            pass
+
+    class OBSERVATION(PropertyMixin):
+        NAME = None
+        ONTOLOGY_ONTOBEE_URI = None
+        ONTOLOGY_CODE = None
+        CATEGORY = None
+        INTERPRETATION = None
+        STATUS = None
+        ANATOMY_SITE = None
+        UBERON_ANATOMY_SITE_ID = None
+
+        class EVENT_AGE(QuantityMixin):
+            pass
+
+    class BIOSPECIMEN_GROUP(PropertyMixin):
+        pass
+
+    class BIOSPECIMEN(PropertyMixin):
+        TISSUE_TYPE = None
+        NCIT_TISSUE_TYPE_ID = None
+        ANATOMY_SITE = None
+        NCIT_ANATOMY_SITE_ID = None
+        UBERON_ANATOMY_SITE_ID = None
+        TUMOR_DESCRIPTOR = None
+        COMPOSITION = None
+        STATUS = None
+        EVENT_AGE_DAYS = None
+
+        class EVENT_AGE(QuantityMixin):
+            pass
+
+        class QUANTITY(QuantityMixin):
+            pass
+
+        class CONCENTRATION(QuantityMixin):
+            pass
+
+        SPATIAL_DESCRIPTOR = None
+        SHIPMENT_ORIGIN = None
+        SHIPMENT_DATE = None
+        ANALYTE = None
+        CONCENTRATION_MG_PER_ML = None
+        VOLUME_UL = None
+        SAMPLE_PROCUREMENT = None
+        DBGAP_STYLE_CONSENT_CODE = None
+        CONSENT_SHORT_NAME = None
+        PRESERVATION_METHOD = None
+        HAS_MATCHED_NORMAL_SAMPLE = None
+
+    class SAMPLE(PropertyMixin):
+        SAMPLE_TYPE = None
+        ANATOMY_SITE = None
+        NCIT_ANATOMY_SITE_ID = None
+        UBERON_ANATOMY_SITE_ID = None
+        TISSUE_TYPE = None
+        SAMPLE_PROCUREMENT = None
+        PRESERVATION_METHOD = None
+        DBGAP_STYLE_CONSENT_CODE = None
+        CONSENT_SHORT_NAME = None
+        VOLUME_UL = None
+        EVENT_AGE_DAYS = None
+        HAS_MATCHED_NORMAL_SAMPLE = None
+        EXTERNAL_COLLECTION_ID = None
+
+        class EVENT_AGE(QuantityMixin):
+            pass
+
+    class GENOMIC_FILE(PropertyMixin, FileMixin):
+        HARMONIZED = None
+        SOURCE_FILE = None
+        REFERENCE_GENOME = None
+        INDEXD_ID = None
+        DRS_URI = None
+
+    class GENOMIC_INDEX_FILE(PropertyMixin, FileMixin):
+        HARMONIZED = None
+        SOURCE_FILE = None
+        REFERENCE_GENOME = None
+        INDEXD_ID = None
+        DRS_URI = None
+
+    class READ_GROUP(PropertyMixin):
+        PAIRED_END = None
+        FLOW_CELL = None
+        LANE_NUMBER = None
+        QUALITY_SCALE = None
+
+    class SEQUENCING(PropertyMixin):
+        DATE = None
+        STRATEGY = None
+        PAIRED_END = None
+        LIBRARY_NAME = None
+        LIBRARY_STRAND = None
+        LIBRARY_SELECTION = None
+        LIBRARY_PREP = None
+        PLATFORM = None
+        INSTRUMENT = None
+        INSERT_SIZE = None
+        REFERENCE_GENOME = None
+        MAX_INSERT_SIZE = None
+        MEAN_INSERT_SIZE = None
+        MEAN_DEPTH = None
+        TOTAL_READS = None
+        MEAN_READ_LENGTH = None
+
+        class CENTER(PropertyMixin):
+            NAME = None
+
+    class BIOSPECIMEN_GENOMIC_FILE(PropertyMixin):
+        pass
+
+    class SEQUENCING_GENOMIC_FILE(PropertyMixin):
+        pass
+
+    class BIOSPECIMEN_DIAGNOSIS(PropertyMixin):
+        pass
+
+    class READ_GROUP_GENOMIC_FILE(PropertyMixin):
+        pass
+
+    class IMAGING_DEVICE(PropertyMixin):
+        MANUFACTURER = None
+        MANUFACTURER_MODEL_NAME = None
+        MAGNETIC_FIELD_STRENGTH = None
+        SOFTWARE_VERSION = None
+
+    class IMAGING_STUDY(PropertyMixin):
+        STATUS = None
+        TECHNIQUE = None
+        SEQUENCE = None
+        TOTAL_ACQUISITIONS = None
+        EVENT_AGE_DAYS = None
+        PROJECT_NAME = None
+
+    class IMAGING_ACQUISITION(PropertyMixin):
+        BODY_SITE = None
+        NUMBER = None
+        MODALITY = None
+        LABEL = None
+
+    class IMAGING_FILE(PropertyMixin, FileMixin):
+        TECHNIQUE = None
+        SEQUENCE = None
+        pass
+
+
+def compile_schema():
+    """
+    "Compile" the concept schema
+
+    Populate every concept class attribute with a string that represents
+    a path in the concept class hierarchy to reach that attribute.
+
+    Store all the concept property strings in a set for later reference and
+    validation.
+
+    This approach eliminates the need to manually assign concept class
+    attributes to a string.
+    """
+
+    property_path = []
+    property_paths = set()
+    _set_cls_attrs(
+        CONCEPT, None, property_path, property_paths, include_root=False
+    )
+    return property_paths
+
+
+str_to_CONCEPT = {}
+
+
+def _set_cls_attrs(
+    node, prev_node, property_path, property_paths, include_root=False
+):
+    """
+    Recursive method to traverse a class hierarchy and set class attributes
+    equal to a string which represents a path in the hierarchy to reach the
+    attribute.
+
+    For example, after running the method on this class definition:
+        class A:
+            class B:
+                ID = None
+                class C:
+                    ID = None
+            AGE = None
+
+    Given a delimiter set to '|', the values of the attributes would be:
+        A.AGE = "A|AGE"
+        A.B.ID = "A|B|ID"
+        A.B.C.ID = "A|B|C|ID"
+    """
+    # Process a class or child node
+    if callable(node):
+        # Add class name to property path
+        property_path.append(str(node.__name__))
+        # Iterate over class attrs
+        for attr_name, value in obj_attrs_to_dict(node).items():
+            # Recurse
+            if callable(value):
+                _set_cls_attrs(
+                    value,
+                    node,
+                    property_path,
+                    property_paths,
+                    include_root=include_root,
+                )
+            else:
+                _set_cls_attrs(
+                    attr_name,
+                    node,
+                    property_path,
+                    property_paths,
+                    include_root=include_root,
+                )
+    # Process leaf nodes
+    else:
+        # Don't include root in property path
+        if not include_root:
+            property_path = property_path[1:]
+        # Create current path str
+        concept_name_str = DELIMITER.join(property_path)
+        # Add attribute to property path
+        property_path.append(node)
+        # Create property string
+        property_path_str = DELIMITER.join(property_path)
+        # Set attribute on class to equal the property path string OR
+        # The concept name path string if the attribute is _CONCEPT_NAME
+        if node == "_CONCEPT_NAME":
+            setattr(prev_node, node, concept_name_str)
+            str_to_CONCEPT[concept_name_str] = prev_node
+        else:
+            setattr(prev_node, node, property_path_str)
+
+        # Add property string to list of property path strings
+        property_paths.add(property_path_str)
+
+    property_path.pop()
+
+
+# Set the concept class attributes with their serialized property strings
+# Create a set of the serialized concept property strings
+concept_property_set = compile_schema()

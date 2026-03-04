@@ -4,8 +4,11 @@ Entrypoint for the CLI
 All commands are initialized here
 """
 
-import click
-from d3b_api_client_cli.cli.dewrangle import *
+from d3b_api_client_cli.cli.dewrangle.graphql_commands import *
+from d3b_api_client_cli.cli.dewrangle.ingest_commands import *
+from d3b_api_client_cli.cli.dewrangle.setup_commands import *
+from d3b_api_client_cli.cli.dewrangle.global_id_commands import *
+from d3b_api_client_cli.cli.fhir.commands import *
 from d3b_api_client_cli.cli.postgres import *
 from d3b_api_client_cli.cli.faker import *
 
@@ -27,9 +30,17 @@ def postgres():
 @click.group()
 def dewrangle():
     """
-    Group of lower level CLI commands relating to working directly with the
-    Dewrangle API
+    Group of CLI commands relating to working with the Dewrangle
     """
+    pass
+
+
+@click.group()
+def fhir():
+    """
+    Group of CLI commands relating to FHIR service operations
+    """
+    pass
 
 
 @click.group()
@@ -49,31 +60,37 @@ faker.add_command(generate_global_id_file)
 # Postgres API commands
 postgres.add_command(save_file_to_db)
 
-# Dewrangle API commands
+# CRUD Graphql commands
 dewrangle.add_command(upsert_organization)
 dewrangle.add_command(delete_organization)
 dewrangle.add_command(read_organizations)
 dewrangle.add_command(upsert_study)
 dewrangle.add_command(delete_study)
 dewrangle.add_command(read_studies)
-dewrangle.add_command(upsert_credential)
-dewrangle.add_command(delete_credential)
-dewrangle.add_command(read_credentials)
-dewrangle.add_command(upsert_volume)
-dewrangle.add_command(delete_volume)
-dewrangle.add_command(read_volumes)
-dewrangle.add_command(list_and_hash_volume)
-dewrangle.add_command(hash_volume_and_wait)
-dewrangle.add_command(read_job)
-dewrangle.add_command(create_billing_group)
-dewrangle.add_command(delete_billing_group)
-dewrangle.add_command(read_billing_groups)
-dewrangle.add_command(upsert_global_descriptors)
-dewrangle.add_command(download_global_descriptors)
-dewrangle.add_command(upsert_and_download_global_descriptors)
-dewrangle.add_command(upsert_and_download_global_descriptor)
+dewrangle.add_command(get_study)
+dewrangle.add_command(read_fhir_ingest_job)
+dewrangle.add_command(read_fhir_servers)
+dewrangle.add_command(upsert_fhir_server)
+dewrangle.add_command(delete_fhir_server)
 
-# Add command groups to the root CLI
-main.add_command(dewrangle)
-main.add_command(postgres)
-main.add_command(faker)
+# Ingest into Dewrangle commands
+dewrangle.add_command(upload_study_file)
+dewrangle.add_command(ingest_study_file)
+dewrangle.add_command(ingest_study_files)
+
+# Setup commands
+dewrangle.add_command(setup_dewrangle_org)
+dewrangle.add_command(setup_dewrangle_study)
+dewrangle.add_command(setup_all_studies)
+
+# Global ID commands
+dewrangle.add_command(upsert_global_ids)
+dewrangle.add_command(download_global_ids)
+
+# FHIR commands
+fhir.add_command(build)
+fhir.add_command(load_fhir)
+fhir.add_command(delete_from_file)
+fhir.add_command(delete_all)
+fhir.add_command(delete_fhir_study)
+fhir.add_command(total_counts)

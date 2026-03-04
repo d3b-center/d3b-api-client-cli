@@ -9,12 +9,14 @@ import re
 import logging
 from logging.handlers import RotatingFileHandler
 
-from d3b_api_client_cli.config import SECRETS, LOG_DIR
-from d3b_api_client_cli.utils.misc import timestamp
+from d3b_api_client_cli import utils
+from d3b_api_client_cli.config import SECRETS, config
 
-DEFAULT_LOG_FILENAME = "d3b_data_transfer_pipeline"
-DEFAULT_LOG_LEVEL = "info"
-DEFAULT_LOG_DIR = LOG_DIR
+config = config["logging"]
+
+DEFAULT_LOG_LEVEL = config["default_log_level"]
+DEFAULT_LOG_FILENAME = config["default_log_filename"]
+DEFAULT_LOG_DIR = config["default_log_dir"]
 
 VERBOTEN_PATTERNS = {
     re.escape(os.environ[v]): f"<env['{v}']>"
@@ -47,7 +49,7 @@ DEFAULT_FORMAT = "%(asctime)s - %(name)s" " -  %(levelname)s - %(message)s"
 DEFAULT_FORMATTER = NoTokenFormatter(DEFAULT_FORMAT)
 
 
-def init_logger(log_level=None, log_dir=None, write_logs=True):
+def init_logger(log_level=None, log_dir=None):
     """
     Configure and create the logger
 
@@ -70,21 +72,18 @@ def init_logger(log_level=None, log_dir=None, write_logs=True):
     root.setLevel(log_level)
     root.addHandler(console_handler)
 
-    log_filepath = None
-    if write_logs:
-        if not log_dir:
-            log_dir = DEFAULT_LOG_DIR
-        os.makedirs(log_dir, exist_ok=True)
+    # Also log to file
+    if not log_dir:
+        log_dir = DEFAULT_LOG_DIR
+    os.makedirs(log_dir, exist_ok=True)
 
-        # Create a new log file named with a timestamp
-        filename = f"{DEFAULT_LOG_FILENAME}-{timestamp()}.log"
-        log_filepath = os.path.join(log_dir, filename)
+    # Create a new log file named with a timestamp
+    filename = f"{DEFAULT_LOG_FILENAME}-{utils.timestamp()}.log"
+    log_filepath = os.path.join(log_dir, filename)
 
-        file_handler = RotatingFileHandler(
-            log_filepath, mode="w", maxBytes=MB_50
-        )
-        file_handler.setFormatter(DEFAULT_FORMATTER)
+    file_handler = RotatingFileHandler(log_filepath, mode="w", maxBytes=MB_50)
+    file_handler.setFormatter(DEFAULT_FORMATTER)
 
-        root.addHandler(file_handler)
+    root.addHandler(file_handler)
 
     return log_filepath

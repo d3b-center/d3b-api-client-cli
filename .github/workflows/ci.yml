@@ -2,36 +2,37 @@ name: ✅ CI
 
 on:
   pull_request:
-    types: [opened, reopened, edited, synchronize, closed]
+    types: [opened, reopened, synchronize, ready_for_review]
 
 concurrency:
   group: ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 env:
-  DEWRANGLE_DEV_PAT: ${{ secrets.DEWRANGLE_DEV_PAT }} 
-  DEWRANGLE_BASE_URL: ${{ secrets.DEWRANGLE_BASE_URL }} 
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} 
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }} 
-  AWS_BUCKET_DATA_TRANSFER_TEST: ${{ secrets.AWS_BUCKET_DATA_TRANSFER_TEST }} 
-  CAVATICA_BILLING_GROUP_ID: ${{ secrets.CAVATICA_BILLING_GROUP_ID }} 
+  DEWRANGLE_DEV_PAT: ${{ secrets.DEWRANGLE_DEV_PAT }}
+  DEWRANGLE_BASE_URL: ${{ secrets.DEWRANGLE_BASE_URL }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_BUCKET_DATA_TRANSFER_TEST: ${{ secrets.AWS_BUCKET_DATA_TRANSFER_TEST }}
+  CAVATICA_BILLING_GROUP_ID: ${{ secrets.CAVATICA_BILLING_GROUP_ID }}
+  DWDS_DELETE_SAFETY_CHECK: ${{ secrets.DWDS_DELETE_SAFETY_CHECK }}
 
 jobs:
   lint:
     name: 🚨 Lint code
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: 👩‍💻 Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
 
       - name: 📦 Install deps
         run: |
+          python -m pip install --upgrade pip
           pip install black==24.10.0
 
       - name: 🚨 Lint code
@@ -40,55 +41,58 @@ jobs:
 
   unit-test:
     name: ✅ Unit test
-    runs-on: ubuntu-20.04
-    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - name: 👩‍💻 Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
 
       - name: 📦 Install deps
         run: |
-          pip install --upgrade virtualenv
-          virtualenv -p python3 venv
-          source venv/bin/activate
-          pip install -e .
-          pip install .[dev]
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
 
       - name: ✅ Test
         run: |
-          source venv/bin/activate
-          pytest --show-capture={no,stdout,stderr} ./tests/unit
-
+          pytest --show-capture={no,stdout,stderr} tests/unit
 
   integration-test:
     name: ✅ Integration test
-    runs-on: ubuntu-20.04
-    timeout-minutes: 10
-    steps:
-      - name: 👩‍💻 Checkout code
-        uses: actions/checkout@v3
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
 
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v3
+    # IMPORTANT: secrets are not exposed to fork PRs
+    if: ${{ github.event.pull_request.head.repo.fork == false }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+
+      - name: 🐳 Sanity check Docker
+        run: |
+          docker version
+          docker info
 
       - name: 📦 Install deps
         run: |
-          pip install --upgrade virtualenv
-          virtualenv -p python3 venv
-          source venv/bin/activate
-          pip install -e .
-          pip install .[dev]
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
           d3b-clients --help
 
       - name: ✅ Test
+        env:
+          # Ensure these are present in the test process
+          DEWRANGLE_DEV_PAT: ${{ secrets.DEWRANGLE_DEV_PAT }}
+          DEWRANGLE_BASE_URL: ${{ secrets.DEWRANGLE_BASE_URL }}
         run: |
-          source venv/bin/activate
-          pytest --show-capture={no,stdout,stderr} ./tests/integration
-
+          # Optional: hard-fail early with a clear message instead of confusing KeyErrors
+          python -c "import os; assert os.getenv('DEWRANGLE_DEV_PAT') and os.getenv('DEWRANGLE_BASE_URL'), 'Missing Dewrangle secrets'"
+          pytest --show-capture={no,stdout,stderr} tests/integration

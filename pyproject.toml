@@ -7,30 +7,40 @@ authors = [
 ]
 description = "A CLI tool with functions that interact with commonly used D3b APIs"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.9,<3.13"
 classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: Apache License",
-    "Operating System :: Linux",
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: Apache License",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: MacOS",
 ]
 dependencies = [
   "click==8.1.7",
-  "python-dotenv==1.0.1",
-  "gql==3.5.0",
-  "gql[aiohttp]==3.5.0",
-  "requests==2.32.3",
-  "pandas==2.2.3",
-  "psycopg2-binary==2.9.10",
-  "sqlalchemy==2.0.36",
+  "python-dotenv==1.0.0",
+  "requests==2.31.0",
+  "Faker==19.3.1",
+  "pandas>=2.2.0,<3",
+  "numpy<2.0.0",
+  "psycopg2-binary==2.9.9",
+  "base32-crockford==0.3.0",
+  "gql==3.4.1",
+  "aiohttp>=3.9.5,<4",
+  "deepdiff==6.7.1",
+  "pyyaml==6.0.1",
+  "urllib3",
+  "SQLAlchemy==2.0.32",
 ]
 
 [project.optional-dependencies]
 dev = [
-  "pytest==8.3.3",
-  "pytest-mock==3.14.0",
+  "autopep8",
+  "pylint",
   "black==24.10.0",
+  "pytest==7.4.2",
+  "requests-mock==1.11.0",
+  "deepdiff==6.7.1",
+  "boto3==1.35.25",
   "testcontainers[postgres]==4.9.0",
-  "requests-mock==1.12.1",
 ]
 
 [project.scripts]
@@ -41,7 +51,7 @@ Homepage = "https://github.com/d3b-center/d3b-api-client-cli"
 Issues = "https://github.com/d3b-center/d3b-api-client-cli/issues"
 
 [build-system]
-requires = ["setuptools >= 61.0"]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
